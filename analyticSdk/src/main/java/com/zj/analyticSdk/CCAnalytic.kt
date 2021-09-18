@@ -39,7 +39,7 @@ class CCAnalytic<T : CAConfigs>(private val config: T) {
             this.application = app
             this.progressName = AppInfoUtils.getMainProcessName(app)
             AppUtils.init(app)
-            DBHelper.getInstance(app, app.packageName, dataEncrypt)
+            DBHelper.getInstance(app, dataEncrypt)
             if (instance == null) {
                 synchronized(CCAnalytic) {
                     if (instance == null) {

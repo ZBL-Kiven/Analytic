@@ -12,9 +12,11 @@ import org.json.JSONException
 import org.json.JSONObject
 
 @Suppress("unused")
-class DBHelper private constructor(context: Context, packageName: String, dataEncrypt: CCAnalyticsEncrypt? = null) {
+class DBHelper private constructor(context: Context, dataEncrypt: CCAnalyticsEncrypt? = null) {
 
-    private val mDbParams: DbParams = DbParams.getInstance(packageName)
+    init {
+        DbParams.init(context)
+    }
 
     private var mTrackEventOperation: DataOperation = if (dataEncrypt != null) {
         EncryptDataOperation(context.applicationContext, dataEncrypt)
@@ -26,9 +28,9 @@ class DBHelper private constructor(context: Context, packageName: String, dataEn
     companion object {
         private var instance: DBHelper? = null
 
-        fun getInstance(context: Context, packageName: String, dataEncrypt: CCAnalyticsEncrypt?): DBHelper {
+        fun getInstance(context: Context, dataEncrypt: CCAnalyticsEncrypt?): DBHelper {
             if (instance == null) {
-                instance = DBHelper(context, packageName, dataEncrypt)
+                instance = DBHelper(context, dataEncrypt)
             }
             return instance!!
         }
@@ -48,9 +50,9 @@ class DBHelper private constructor(context: Context, packageName: String, dataEn
      * on failure
      */
     fun addJSON(j: JSONObject): Int {
-        val code: Int = mTrackEventOperation.insertData(mDbParams.eventUri, j)
+        val code: Int = mTrackEventOperation.insertData(DbParams.DbUriMap.TAB_EVENT.getUri(), j)
         return if (code == 0) {
-            mTrackEventOperation.queryDataCount(mDbParams.eventUri)
+            mTrackEventOperation.queryDataCount(DbParams.DbUriMap.TAB_EVENT.getUri())
         } else code
     }
 
@@ -58,7 +60,7 @@ class DBHelper private constructor(context: Context, packageName: String, dataEn
      * Removes all events from table
      */
     fun deleteAllEvents() {
-        mTrackEventOperation.deleteData(mDbParams.eventUri, DbParams.DB_DELETE_ALL)
+        mTrackEventOperation.deleteData(DbParams.DbUriMap.TAB_EVENT.getUri(), DbParams.DB_DELETE_ALL)
     }
 
     /**
@@ -68,63 +70,21 @@ class DBHelper private constructor(context: Context, packageName: String, dataEn
      * @return the number of rows in the table
      */
     fun cleanupEvents(lastId: String): Int {
-        mTrackEventOperation.deleteData(mDbParams.eventUri, lastId)
-        return mTrackEventOperation.queryDataCount(mDbParams.eventUri)
+        mTrackEventOperation.deleteData(DbParams.DbUriMap.TAB_EVENT.getUri(), lastId)
+        return mTrackEventOperation.queryDataCount(DbParams.DbUriMap.TAB_EVENT.getUri())
     }
 
-    fun commitAppStartTime(appStartTime: Long) {
+    fun commitChannelInfo(channel: String?) {
         try {
-            mPersistentOperation.insertData(mDbParams.appStartTimeUri, JSONObject().put(DbParams.VALUE, appStartTime))
+            mPersistentOperation.insertData(DbParams.DbUriMap.TAB_CHANNEL.getUri(), JSONObject().put(DbParams.VALUE, channel))
         } catch (e: JSONException) {
             CALogs.printStackTrace(e)
         }
     }
 
-    val appStartTime: Long
+    val channelInfo: String
         get() {
-            val values = mPersistentOperation.queryData(mDbParams.appStartTimeUri, 1)
-            return 0L tryAnother { values?.get(0)?.toLong() }
-        }
-
-    fun commitAppEndTime(appEndTime: Long) {
-        try {
-            mPersistentOperation.insertData(mDbParams.appEndUri, JSONObject().put(DbParams.VALUE, appEndTime))
-        } catch (e: JSONException) {
-            CALogs.printStackTrace(e)
-        }
-    }
-
-    val appEndTime: Long
-        get() {
-            val values = mPersistentOperation.queryData(mDbParams.appEndUri, 1)
-            return 0L tryAnother { values?.get(0)?.toLong() }
-        }
-
-    fun commitLoginId(loginId: String?) {
-        try {
-            mPersistentOperation.insertData(mDbParams.loginIdUri, JSONObject().put(DbParams.VALUE, loginId))
-        } catch (e: JSONException) {
-            CALogs.printStackTrace(e)
-        }
-    }
-
-    val loginId: String
-        get() {
-            val values = mPersistentOperation.queryData(mDbParams.loginIdUri, 1)
-            return "" tryAnother { values?.get(0) }
-        }
-
-    fun commitDeviceId(deviceId: String?) {
-        try {
-            mPersistentOperation.insertData(mDbParams.deviceIdUri, JSONObject().put(DbParams.VALUE, deviceId))
-        } catch (e: JSONException) {
-            CALogs.printStackTrace(e)
-        }
-    }
-
-    val deviceId: String
-        get() {
-            val values = mPersistentOperation.queryData(mDbParams.deviceIdUri, 1)
+            val values = mPersistentOperation.queryData(DbParams.DbUriMap.TAB_CHANNEL.getUri(), 1)
             return "" tryAnother { values?.get(0) }
         }
 
@@ -134,7 +94,7 @@ class DBHelper private constructor(context: Context, packageName: String, dataEn
      * @return 数据
      */
     fun generateDataString(limit: Int): Array<String?>? {
-        return mTrackEventOperation.queryData(mDbParams.eventUri, limit)
+        return mTrackEventOperation.queryData(DbParams.DbUriMap.TAB_EVENT.getUri(), limit)
     }
 
 }
