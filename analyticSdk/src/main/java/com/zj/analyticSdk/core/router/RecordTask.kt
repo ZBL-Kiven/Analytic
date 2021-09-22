@@ -17,7 +17,7 @@ internal class RecordTask(private val info: EventInfo, private val handleIn: Msg
             val defaultParams = BasePropertyCollector.getBaseProperties(recordInfo.eventName)
             val params = CCAnalytic.getConfig().getEventParams(recordInfo.eventName, recordInfo.withData, defaultParams)
             JOUtils.mergeJSONObject(recordInfo.jsonObject, params)
-            val buildParams = CCAnalytic.getConfig().beforeEvent(params) ?: throw NullPointerException("recording params has changed by CAConfig.beforeEvent")
+            val buildParams = CCAnalytic.getConfig().beforeEvent(recordInfo.eventName, params) ?: throw NullPointerException("recording params has changed by CAConfig.beforeEvent")
             DBHelper.getInstance().addJSON(buildParams)
             CALogs.i("CCA.RecordTask", buildParams.toString(), null)
             handleIn.onDeal(isSuccess = true, retry = false, info = info)

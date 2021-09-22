@@ -28,7 +28,7 @@ interface CAConfigs {
         return baseProperties
     }
 
-    fun beforeEvent(properties: JSONObject): JSONObject? {
+    fun beforeEvent(eventName: String, properties: JSONObject): JSONObject? {
         return properties
     }
 

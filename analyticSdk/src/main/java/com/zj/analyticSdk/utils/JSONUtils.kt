@@ -3,6 +3,7 @@ package com.zj.analyticSdk.utils
 import com.zj.analyticSdk.CALogs.printStackTrace
 
 internal object JSONUtils {
+
     private fun addIndentBlank(sb: StringBuilder, indent: Int) {
         try {
             for (i in 0 until indent) {
