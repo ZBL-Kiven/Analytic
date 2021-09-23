@@ -23,8 +23,8 @@ object CAConfig : CAConfigs {
     }
 
     //当数据完成所有构建即将入库，在此处进行 FirBase 。
-    override fun beforeEvent(properties: JSONObject): JSONObject? {
-        return super.beforeEvent(properties)
+    override fun beforeEvent(eventName: String, properties: JSONObject): JSONObject? {
+        return super.beforeEvent(eventName, properties)
     }
 
 }
