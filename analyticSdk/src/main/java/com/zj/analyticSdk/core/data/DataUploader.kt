@@ -68,13 +68,10 @@ class DataUploader(private val mContext: Context) {
                     isSuccess = false
                     errorMessage = "Exception: " + e.message
                 } finally {
-                    val isDebugMode: Boolean = CCAnalytic.getConfig().isDebugEnabled()
                     if (!TextUtils.isEmpty(errorMessage)) {
-                        if (isDebugMode || CCAnalytic.getConfig().isLogEnabled()) {
-                            CALogs.e(TAG, errorMessage)
-                        }
+                        CALogs.e(TAG, errorMessage)
                     }
-                    if (deleteEvents) {
+                    if (deleteEvents || CCAnalytic.getConfig().isDebugEnabled()) {
                         lastId?.let { count = mDbAdapter.cleanupEvents(it) }
                         CALogs.i(TAG, String.format(Locale.CHINA, "Events flushed. [left = %d]", count))
                     } else {
@@ -144,5 +141,4 @@ class DataUploader(private val mContext: Context) {
         }
         return shouldDelete
     }
-
 }

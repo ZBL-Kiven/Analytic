@@ -75,9 +75,8 @@ object UpdateHttpTask {
             mIs = null
             if (responseBody == null) throw ConnectErrorException("flush failure ,the response body is null!!")
             val response = String(responseBody, StandardCharsets.UTF_8)
-            if (CCAnalytic.getConfig().isLogEnabled()) {
-                val jsonMessage: String = JSONUtils.formatJson(rawMessage)
-                // Status code 200-300 are considered correct
+            if (CCAnalytic.getConfig().isDebugEnabled()) {
+                val jsonMessage: String = JSONUtils.formatJson(rawMessage) // Status code 200-300 are considered correct
                 if (responseCode >= HttpURLConnection.HTTP_OK && responseCode < HttpURLConnection.HTTP_MULT_CHOICE) {
                     CALogs.i(TAG, "valid message: \n$jsonMessage")
                 } else {
