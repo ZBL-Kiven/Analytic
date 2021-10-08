@@ -13,20 +13,21 @@ object JOUtils {
     private const val yMdHmsFormat = "yyyy-MM-dd HH:mm:ss.SSS"
     private val formatMaps = ConcurrentHashMap<String, ThreadLocal<SimpleDateFormat?>>()
 
-    fun mergeJSONObject(source: JSONObject, dest: JSONObject) {
-        try {
+    fun mergeJSONObject(source: JSONObject, dest: JSONObject): JSONObject? {
+        return try {
             val superPropertiesIterator = source.keys()
             while (superPropertiesIterator.hasNext()) {
                 val key = superPropertiesIterator.next()
                 val value = source[key]
-                if (value is Date && "\$time" != key) {
+                if (value is Date) {
                     dest.put(key, formatDate(value, Locale.getDefault()))
                 } else {
                     dest.put(key, value)
                 }
             }
+            dest
         } catch (ex: Exception) {
-            CALogs.printStackTrace(ex)
+            CALogs.printStackTrace(ex);null
         }
     }
 

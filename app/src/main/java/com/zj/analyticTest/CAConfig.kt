@@ -18,8 +18,8 @@ object CAConfig : CAConfigs {
     }
 
     //针对特殊数据的处理或者需要添加一些新的参数时。
-    override fun getEventParams(eventName: String, withData: Any?, baseProperties: JSONObject): JSONObject {
-        return super.getEventParams(eventName, withData, baseProperties)
+    override fun addDefaultParam(eventName: String, withData: Any?, baseProperties: JSONObject): JSONObject {
+        return super.addDefaultParam(eventName, withData, baseProperties)
     }
 
     //当数据完成所有构建即将入库，在此处进行 FirBase 。

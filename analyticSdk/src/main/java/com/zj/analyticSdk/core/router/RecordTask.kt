@@ -6,7 +6,6 @@ import com.zj.analyticSdk.core.worker.EventInfo
 import com.zj.analyticSdk.core.worker.MsgDealIn
 import com.zj.analyticSdk.persistence.DBHelper
 import com.zj.analyticSdk.recorder.BasePropertyCollector
-import com.zj.analyticSdk.utils.JOUtils
 import java.lang.Exception
 
 internal class RecordTask(private val info: EventInfo, private val handleIn: MsgDealIn) : Runnable {
@@ -15,9 +14,9 @@ internal class RecordTask(private val info: EventInfo, private val handleIn: Msg
         try {
             val recordInfo = info.data as EventInfo.RecordInfo
             val defaultParams = BasePropertyCollector.getBaseProperties(recordInfo.eventName)
-            val params = CCAnalytic.getConfig().getEventParams(recordInfo.eventName, recordInfo.withData, defaultParams)
-            JOUtils.mergeJSONObject(recordInfo.jsonObject, params)
-            val buildParams = CCAnalytic.getConfig().beforeEvent(recordInfo.eventName, params) ?: throw NullPointerException("recording params has changed by CAConfig.beforeEvent")
+            val params = CCAnalytic.getConfig().addDefaultParam(recordInfo.eventName, recordInfo.withData, defaultParams)
+            val merged = CCAnalytic.getConfig().onMergeProperties(recordInfo.jsonObject, params) ?: throw NullPointerException("recording params must not be null ,transfer by CAConfig.onMergeProperties")
+            val buildParams = CCAnalytic.getConfig().beforeEvent(recordInfo.eventName, merged) ?: throw NullPointerException("recording params must not be null ,transfer by CAConfig.beforeEvent")
             DBHelper.getInstance().addJSON(buildParams)
             CALogs.i("CCA.RecordTask", buildParams.toString(), null)
             handleIn.onDeal(isSuccess = true, retry = false, info = info)

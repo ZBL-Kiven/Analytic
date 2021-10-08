@@ -1,5 +1,6 @@
 package com.zj.analyticSdk
 
+import com.zj.analyticSdk.utils.JOUtils
 import com.zj.analyticSdk.utils.NetworkUtils
 import org.json.JSONObject
 import javax.net.ssl.SSLSocketFactory
@@ -24,8 +25,12 @@ interface CAConfigs {
 
     fun getSSLSocketFactory(): SSLSocketFactory? = null
 
-    fun getEventParams(eventName: String, withData: Any?, baseProperties: JSONObject): JSONObject {
+    fun addDefaultParam(eventName: String, withData: Any?, baseProperties: JSONObject): JSONObject {
         return baseProperties
+    }
+
+    fun onMergeProperties(source: JSONObject, dest: JSONObject): JSONObject? {
+        return JOUtils.mergeJSONObject(source, dest)
     }
 
     fun beforeEvent(eventName: String, properties: JSONObject): JSONObject? {
