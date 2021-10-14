@@ -4,6 +4,7 @@
     package="com.zj.analyticTest">
 
     <application
+        android:name=".BaseApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -12,13 +13,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CCAnalyticSdk"
         tools:targetApi="n">
-        <activity android:name="com.zj.analyticTest.MainActivity">
+
+        <activity
+            android:name="com.zj.analyticTest.MainActivity"
+            android:configChanges="screenLayout|keyboardHidden|screenSize|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".SecondActivity" />
+        <activity android:name=".ThirdActivity" />
     </application>
 
 </manifest>

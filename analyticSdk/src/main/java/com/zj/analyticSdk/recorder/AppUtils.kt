@@ -8,27 +8,29 @@ import android.app.Application
 import android.content.ComponentCallbacks2
 import android.content.Context
 import android.content.res.Configuration
+import android.util.Log
 import com.zj.analyticSdk.CALogs
 import com.zj.analyticSdk.CCAnalytic
 import com.zj.analyticSdk.anno.PageInfo
 import org.json.JSONObject
 import java.lang.IllegalStateException
 import java.lang.ref.WeakReference
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCallbacks2 {
 
     private const val TAG = "CCA.AppUtils"
 
-    /* concurrent page state recorders */
-    private var activityStackInfo = ConcurrentHashMap<String, String>()
     private var curActiveInfo: WeakReference<Activity>? = null
-
     private var application: Application? = null
     private var isInitLifecycleCallback = false
     private var runningTasksNum: Int = 0
     private var isAppInBackgroundCurrent = false
+
+    private var curAppState = ""
+    private var pausingPage: String = ""
+    private var lastPage: String = ""
+    private var curPage: String = ""
 
     fun init(context: Context) {
         if (isInitLifecycleCallback) return
@@ -43,19 +45,20 @@ internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCall
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+        Log.e(TAG, "onActivityCreated: ")
         val pn = getActivityAnnotationsInfo(activity) ?: return
-        CCAnalytic.get()?.tartTimer(pn)
-        if (activityStackInfo["last_activity"] == pn) {
-            activityStackInfo["last_activity"] = ""
-        }
+        CCAnalytic.get()?.startTimer(pn)
+        curPage = getActivityAnnotationsInfo(activity) ?: ""
     }
 
     override fun onActivityStarted(activity: Activity) {
+        Log.e(TAG, "onActivityStarted: ")
         val pn = getActivityAnnotationsInfo(activity) ?: return
+        curPage = pn
         val ev = CCAnalytic.getConfig().getEventNameBuilder()
         val properties = JSONObject()
         properties.put(ev.activityPageNameEvent(), pn)
-        properties.put(ev.activityReferPageEvent(), getLastPageName())
+        properties.put(ev.activityReferPageEvent(), pausingPage)
         properties.put(ev.activityStartTimeEvent(), "${System.currentTimeMillis()}")
         AopParser.getCurFollowedPageParams(activity, properties)
         CCAnalytic.get()?.trackEvent(ev.activityPageStarted(), properties)
@@ -65,10 +68,12 @@ internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCall
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 
     override fun onActivityResumed(activity: Activity) {
+        Log.e(TAG, "onActivityResumed: ")
+        curPage = getActivityAnnotationsInfo(activity) ?: ""
         runningTasksNum++
         if (isAppInBackgroundCurrent) {
             isAppInBackgroundCurrent = false
-            activityStackInfo["app_state"] = "foreground"
+            curAppState = "foreground"
         }
         if (curActiveInfo?.get() != activity) {
             curActiveInfo = WeakReference(activity)
@@ -76,30 +81,33 @@ internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCall
     }
 
     override fun onActivityPaused(activity: Activity) {
+        Log.e(TAG, "onActivityPaused: ")
         runningTasksNum = runningTasksNum--.coerceAtLeast(0)
+        pausingPage = getActivityAnnotationsInfo(activity) ?: ""
     }
 
     override fun onActivityStopped(activity: Activity) {
+        Log.e(TAG, "onActivityStopped: ")
         val pn = getActivityAnnotationsInfo(activity) ?: return
         CCAnalytic.get()?.pauseTimer(pn)
-    }
-
-    override fun onActivityDestroyed(activity: Activity) {
-        if (curActiveInfo?.get() == activity) {
-            curActiveInfo?.clear()
-        }
-        val pn = getActivityAnnotationsInfo(activity) ?: return
         val ev = CCAnalytic.getConfig().getEventNameBuilder()
         val event = CCAnalytic.get()?.finishTimer(pn)
         val properties = JSONObject()
         properties.put(ev.activityPageNameEvent(), pn)
-        properties.put(ev.activityReferPageEvent(), getLastPageName())
+        properties.put(ev.activityReferPageEvent(), lastPage)
         properties.put(ev.activityTimeDurationEvent(), "${event?.duration(TimeUnit.MILLISECONDS)}")
         properties.put(ev.activityStartTimeEvent(), "${event?.getCreateTime()}")
         properties.put(ev.activityEndTimeEvent(), "${System.currentTimeMillis()}")
         AopParser.getCurFollowedPageParams(activity, properties)
         CCAnalytic.get()?.trackEvent(ev.activityPageFinished(), properties)
-        activityStackInfo["last_activity"] = pn
+        lastPage = pn
+    }
+
+    override fun onActivityDestroyed(activity: Activity) {
+        Log.e(TAG, "onActivityDestroyed: ")
+        if (curActiveInfo?.get() == activity) {
+            curActiveInfo?.clear()
+        }
     }
 
     override fun onLowMemory() {}
@@ -109,12 +117,16 @@ internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCall
     override fun onTrimMemory(level: Int) {
         if (!isAppInBackgroundCurrent && level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
             isAppInBackgroundCurrent = true
-            activityStackInfo["app_state"] = "background"
+            curAppState = "background"
         }
     }
 
-    fun getLastPageName(): String {
-        return activityStackInfo["last_activity"] ?: ""
+    fun getCurAppState(): String {
+        return curAppState
+    }
+
+    fun getCurPageName(): String {
+        return curPage
     }
 
     fun parseCurActParamInfo(obj: JSONObject) {

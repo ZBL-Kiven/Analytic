@@ -18,11 +18,12 @@ internal object BasePropertyCollector {
         } catch (e: Exception) {
             CALogs.printStackTrace(e)
         }
-        params.put(nameBuilder.osType(), "Android")
         params.put(nameBuilder.eventName(), eventName)
-        params.put(nameBuilder.appVersionName(), AppInfoUtils.getAppVersionName(context))
-        params.put(nameBuilder.eventTime(), "${System.currentTimeMillis()}")
+        params.put(nameBuilder.osType(), "Android")
         params.put(nameBuilder.eventId(), UUID.randomUUID().toString())
+        params.put(nameBuilder.activityPageNameEvent(), AppUtils.getCurPageName())
+        params.put(nameBuilder.eventTime(), "${System.currentTimeMillis()}")
+        params.put(nameBuilder.appVersionName(), AppInfoUtils.getAppVersionName(context))
         return params
     }
 

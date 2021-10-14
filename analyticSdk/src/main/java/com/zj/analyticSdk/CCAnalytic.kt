@@ -54,7 +54,7 @@ class CCAnalytic<T : CAConfigs>(private val config: T) {
         }
     }
 
-    fun tartTimer(eventName: String) {
+    fun startTimer(eventName: String) {
         TimerTrackerUtils.startNewTimer(eventName)
     }
 
