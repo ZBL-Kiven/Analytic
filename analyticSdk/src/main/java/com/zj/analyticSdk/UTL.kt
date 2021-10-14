@@ -48,7 +48,7 @@ interface EventNameBuilder {
 
     fun activityPageFinished(): String = "view_page"
 
-    fun appVersionName(): String = "app_version_name"
+    fun appVersionName(): String = "app_version"
 
     fun osType(): String = "os"
 
