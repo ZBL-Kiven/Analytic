@@ -3,6 +3,7 @@ package com.zj.analyticTest
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import com.zj.analyticSdk.CCAnalytic
 import com.zj.analyticSdk.anno.PageAnalyticParams
@@ -17,6 +18,7 @@ class SecondActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Log.e("onStart SecondActivity", "${intent.getStringExtra("111")}")
     }
 
     /**
@@ -31,6 +33,12 @@ class SecondActivity : AppCompatActivity() {
      * */
     fun toNext(view: View) {
         startActivity(Intent(this, ThirdActivity::class.java))
+    }
+
+    override fun finish() {
+//        intent.putExtra("222", "casca")
+//        setResult(200)
+        super.finish()
     }
 
 }

@@ -3,6 +3,7 @@ package com.zj.analyticTest
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import com.zj.analyticSdk.CCAnalytic
 import com.zj.analyticSdk.anno.PageAnalyticParams
@@ -12,7 +13,7 @@ import com.zj.analyticSdk.anno.PageInfo
  * 通过在任何 Activity 页面顶部注解 [PageInfo] ，将自动统计页面相关属性。
  * */
 @PageInfo(pageName = "MainActivity test")
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseResultAbleActivity() {
 
     /**
      * 无限制，可同时注解多个元素
@@ -40,7 +41,14 @@ class MainActivity : AppCompatActivity() {
      * 测试使用，不需要手动调用。
      * */
     fun toNext(view: View) {
-        startActivity(Intent(this, SecondActivity::class.java))
+        startActivityForResult(SecondActivity::class.java.name, 300, params = arrayOf("111" to "asdasd")) { i, i2, intent ->
+            Log.e("start act result ===> ", "rq = $i   rsp = $i2  param = ${intent?.getStringExtra("222")}")
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Log.e("onActivityResult ", "rq = $requestCode   rsp = $resultCode  param = ${data?.getStringExtra("222")}")
     }
 
 }
