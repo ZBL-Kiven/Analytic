@@ -34,19 +34,19 @@ internal infix fun AtomicInteger.plus(another: Int) {
 
 interface EventNameBuilder {
 
-    fun activityPageNameEvent(): String = "page_name"
+    fun pageNameEvent(): String = "page_name"
 
-    fun activityReferPageEvent(): String = "refer_page_name"
+    fun referPageEvent(): String = "refer_page_name"
 
-    fun activityTimeDurationEvent(): String = "duration"
+    fun timeDurationEvent(): String = "duration"
 
-    fun activityEndTimeEvent(): String = "quit_page_time"
+    fun onEndTimeEvent(): String = "quit_page_time"
 
-    fun activityStartTimeEvent(): String = "enter_page_time"
+    fun onStartTimeEvent(): String = "enter_page_time"
 
-    fun activityPageStarted(): String = "enter_page"
+    fun onPageStarted(): String = "enter_page"
 
-    fun activityPageFinished(): String = "view_page"
+    fun onPageFinished(): String = "view_page"
 
     fun appVersionName(): String = "app_version"
 

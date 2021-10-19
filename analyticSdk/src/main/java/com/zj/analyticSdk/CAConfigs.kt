@@ -29,7 +29,7 @@ interface CAConfigs {
         return baseProperties
     }
 
-    fun onMergeProperties(source: JSONObject, dest: JSONObject): JSONObject? {
+    fun onMergeProperties(eventName: String, source: JSONObject, dest: JSONObject): JSONObject? {
         return JOUtils.mergeJSONObject(source, dest)
     }
 

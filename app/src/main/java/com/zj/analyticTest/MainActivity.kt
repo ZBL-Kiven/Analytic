@@ -1,18 +1,13 @@
 package com.zj.analyticTest
 
-import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import com.zj.analyticSdk.CCAnalytic
 import com.zj.analyticSdk.anno.PageAnalyticParams
-import com.zj.analyticSdk.anno.PageInfo
+import com.zj.cf.setConstrainFragmentLifecycleCallBack
 
-/**
- * 通过在任何 Activity 页面顶部注解 [PageInfo] ，将自动统计页面相关属性。
- * */
-@PageInfo(pageName = "MainActivity test")
+
 class MainActivity : BaseResultAbleActivity() {
 
     /**
@@ -23,11 +18,22 @@ class MainActivity : BaseResultAbleActivity() {
      * 此字段仍可正常使用。
      * */
     @PageAnalyticParams("page_title") var pageTitle: Int = 0; get() = field++
+    @PageAnalyticParams("page_title1") var pageTitle1: Int = 0; get() = field++
+    @PageAnalyticParams("page_title2") var pageTitle2: Int = 0; get() = field++
+    @PageAnalyticParams("page_title3") var pageTitle3: Int = 0; get() = field++
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setConstrainFragmentLifecycleCallBack { lifecycle, s, s2 ->
+            Log.e("------ ", "$lifecycle  $s   , $s2")
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        CCAnalytic.get()?.trackPageStart(this::class.java.simpleName, this)
     }
 
     /**
@@ -45,10 +51,4 @@ class MainActivity : BaseResultAbleActivity() {
             Log.e("start act result ===> ", "rq = $i   rsp = $i2  param = ${intent?.getStringExtra("222")}")
         }
     }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        Log.e("onActivityResult ", "rq = $requestCode   rsp = $resultCode  param = ${data?.getStringExtra("222")}")
-    }
-
 }

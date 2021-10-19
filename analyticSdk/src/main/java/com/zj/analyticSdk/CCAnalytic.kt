@@ -8,6 +8,7 @@ import com.zj.analyticSdk.core.worker.WorkManagerQueue
 import com.zj.analyticSdk.persistence.DBHelper
 import com.zj.analyticSdk.persistence.encrypt.CCAnalyticsEncrypt
 import com.zj.analyticSdk.recorder.AppUtils
+import com.zj.analyticSdk.recorder.PageTracker
 import com.zj.analyticSdk.utils.EventTimer
 import org.json.JSONObject
 
@@ -70,6 +71,10 @@ class CCAnalytic<T : CAConfigs>(private val config: T) {
         return TimerTrackerUtils.endTimer(eventName)
     }
 
+    internal fun peekTimer(eventName: String): EventTimer? {
+        return TimerTrackerUtils.peekTimer(eventName)
+    }
+
     @SafeVarargs
     fun trackEvent(eventName: String, vararg params: Pair<String, Any>) {
         this.trackEvent(eventName, arrayToMap(*params))
@@ -81,6 +86,14 @@ class CCAnalytic<T : CAConfigs>(private val config: T) {
 
     fun trackEvent(eventName: String, params: Map<String, Any?>, withData: Any?) {
         this.trackEvent(eventName, JSONObject(params), withData)
+    }
+
+    fun trackPageStart(pageName: String, followedInfo: Any? = null, properties: JSONObject? = null) {
+        PageTracker.onPageStart(pageName, followedInfo, properties)
+    }
+
+    fun trackPageEnd(pageName: String, properties: JSONObject? = null) {
+        PageTracker.onPageEnd(pageName, properties)
     }
 
     fun uploadTest() {

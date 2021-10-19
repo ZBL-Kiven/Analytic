@@ -30,6 +30,10 @@ internal object TimerTrackerUtils {
         return mTrackTimer.remove(name)
     }
 
+    fun peekTimer(name: String): EventTimer? {
+        return mTrackTimer[name]
+    }
+
     fun getTimerAccumulateDuration(name: String, timeUnit: TimeUnit): Long {
         return mTrackTimer[name]?.duration(timeUnit) ?: 0L
     }
@@ -37,15 +41,11 @@ internal object TimerTrackerUtils {
 
 class EventTimer {
 
+    var createTime: Long = System.currentTimeMillis()
     private var startTime: Long = SystemClock.elapsedRealtime()
-    private var createTime: Long = startTime
     private var endTime: Long = -1
     private var eventAccumulatedDuration: Long = 0
     private var isPaused = false
-
-    fun getCreateTime(): Long {
-        return createTime
-    }
 
     fun duration(timeUnit: TimeUnit): Long {
         endTime = if (isPaused) {

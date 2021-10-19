@@ -4,13 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import com.zj.analyticSdk.CCAnalytic
-import com.zj.analyticSdk.anno.PageAnalyticParams
-import com.zj.analyticSdk.anno.PageInfo
 
-/**
- * 通过在任何 Activity 页面顶部注解 [PageInfo] ，将自动统计页面相关属性。
- * */
-@PageInfo(pageName = "ThirdActivity")
 class ThirdActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,4 +26,8 @@ class ThirdActivity : AppCompatActivity() {
         CCAnalytic.get()?.uploadTest()
     }
 
+    override fun onStart() {
+        super.onStart()
+        CCAnalytic.get()?.trackPageStart(this::class.java.simpleName)
+    }
 }

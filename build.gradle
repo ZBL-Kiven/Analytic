@@ -13,6 +13,13 @@ buildscript {
 
 allprojects {
     repositories {
+        maven {
+            credentials {
+                username 'usr'
+                password '123456'
+            }
+            url "http://www.jqyard.cn:8081/repository/zjj-release/"
+        }
         google()
         mavenCentral()
     }
