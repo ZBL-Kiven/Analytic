@@ -5,6 +5,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
 import android.text.TextUtils
+import android.util.Log
 import com.zj.analyticSdk.CALogs
 import com.zj.analyticSdk.CCAnalytic
 import com.zj.analyticSdk.persistence.DbParams
@@ -14,7 +15,9 @@ import java.io.File
 internal abstract class DataOperation(mContext: Context) {
 
     private var tag = "EventDataOperation"
-    @JvmField var contentResolver: ContentResolver = mContext.contentResolver
+
+    private var contentResolver: ContentResolver = mContext.contentResolver
+
     private val mDatabaseFile: File = mContext.getDatabasePath(DbParams.DATABASE_NAME)
 
     abstract fun insertData(uri: Uri, jsonObject: JSONObject): Int
@@ -84,6 +87,13 @@ internal abstract class DataOperation(mContext: Context) {
             }
         }
         return 0
+    }
+
+    protected fun <R> withCR(run: (ContentResolver) -> R?): R? {
+        return synchronized(contentResolver) {
+            Log.e(tag, "call withCR in thread [${Thread.currentThread().name}]")
+            run(contentResolver)
+        }
     }
 
     private fun getMaxCacheSize(): Long {

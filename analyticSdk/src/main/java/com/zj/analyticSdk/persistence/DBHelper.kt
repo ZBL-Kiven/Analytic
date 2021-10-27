@@ -12,7 +12,7 @@ import org.json.JSONException
 import org.json.JSONObject
 
 @Suppress("unused")
-class DBHelper private constructor(context: Context, dataEncrypt: CCAnalyticsEncrypt? = null) {
+internal class DBHelper private constructor(context: Context, dataEncrypt: CCAnalyticsEncrypt? = null) {
 
     init {
         DbParams.init(context)

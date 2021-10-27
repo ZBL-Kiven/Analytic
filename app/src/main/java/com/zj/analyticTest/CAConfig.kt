@@ -14,7 +14,7 @@ object CAConfig : CAConfigs {
 
     //服务器地址
     override fun getServerUrl(): String {
-        return "http://192.168.50.212:8081/track_new?access_token=6228feb1-2a09-432a-a923-bc6aaf89f91e"
+        return "https://data.ccdev.lerjin.com/track_new?access_token=6228feb1-2a09-432a-a923-bc6aaf89f91e"
     }
 
     //针对特殊数据的处理或者需要添加一些新的参数时。
@@ -22,7 +22,7 @@ object CAConfig : CAConfigs {
         return super.addDefaultParam(eventName, withData, baseProperties)
     }
 
-    //当数据完成所有构建即将入库，在此处进行 FirBase 。
+    //当数据完成所有构建即将入库。
     override fun beforeEvent(eventName: String, properties: JSONObject): JSONObject? {
         return super.beforeEvent(eventName, properties)
     }

@@ -11,12 +11,10 @@ import com.zj.analyticSdk.core.router.UploadTask
 import com.zj.analyticSdk.persistence.DBHelper
 import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executors
 import kotlin.random.Random
 
 internal class AnalyticsMessageHandler(looper: Looper) : Handler(looper), MsgDealIn {
 
-    private val worker = Executors.newFixedThreadPool(HandleType.values().size)
     private val handleMap = ConcurrentHashMap<HandleType, Boolean>()
     private var maxUploadIntervalNum = 0
         set(value) {
@@ -61,7 +59,7 @@ internal class AnalyticsMessageHandler(looper: Looper) : Handler(looper), MsgDea
                 CheckTask().run()
             }
             HandleType.UPLOAD.code -> {
-                worker.execute(UploadTask(info, this))
+                UploadTask(info, this).run()
             }
             HandleType.ANALYTIC.code -> {
                 maxUploadIntervalNum++

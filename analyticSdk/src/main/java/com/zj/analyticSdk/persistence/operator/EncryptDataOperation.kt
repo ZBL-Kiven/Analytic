@@ -23,7 +23,7 @@ internal class EncryptDataOperation(context: Context?, private val dataEncrypt: 
             val cv = ContentValues()
             cv.put(DbParams.KEY_DATA, obj.toString() + "\t" + obj.toString().hashCode())
             cv.put(DbParams.KEY_CREATED_AT, System.currentTimeMillis())
-            contentResolver.insert(uri, cv)
+            withCR { it.insert(uri, cv) }
         } catch (e: Exception) {
             printStackTrace(e)
         }
@@ -35,7 +35,7 @@ internal class EncryptDataOperation(context: Context?, private val dataEncrypt: 
             if (deleteDataLowMemory(uri) != 0) {
                 return DbParams.DB_OUT_OF_MEMORY_ERROR
             }
-            contentResolver.insert(uri, contentValues)
+            withCR { it.insert(uri, contentValues) }
         } catch (e: Exception) {
             printStackTrace(e)
         }
@@ -43,71 +43,73 @@ internal class EncryptDataOperation(context: Context?, private val dataEncrypt: 
     }
 
     override fun queryData(uri: Uri, limit: Int): Array<String?>? {
-        var cursor: Cursor? = null
         var data: String? = null
         var lastId: String? = null
         var gzipType = DbParams.GZIP_DATA_ENCRYPT
-        try {
-            val dataEncryptMap: MutableMap<String, JSONArray> = HashMap()
-            val dataJsonArray = JSONArray()
-            cursor = contentResolver.query(uri, null, null, null, DbParams.KEY_CREATED_AT + " ASC LIMIT " + limit)
-            if (cursor != null) {
-                var keyData: String?
-                var jsonObject: JSONObject
-                val eKey = "eKey"
-                val keyVer = "pkv"
-                val payloads = "payloads"
-                while (cursor.moveToNext()) {
-                    if (cursor.isLast) {
-                        lastId = cursor.getString(cursor.getColumnIndex("_id"))
-                    }
-                    try {
-                        keyData = cursor.getString(cursor.getColumnIndex(DbParams.KEY_DATA))
-                        keyData = parseData(keyData)
-                        if (TextUtils.isEmpty(keyData)) {
-                            continue
+        withCR {
+            var cursor: Cursor? = null
+            try {
+                val dataEncryptMap: MutableMap<String, JSONArray> = HashMap()
+                val dataJsonArray = JSONArray()
+                cursor = it.query(uri, null, null, null, DbParams.KEY_CREATED_AT + " ASC LIMIT " + limit)
+                if (cursor != null) {
+                    var keyData: String?
+                    var jsonObject: JSONObject
+                    val eKey = "eKey"
+                    val keyVer = "pkv"
+                    val payloads = "payloads"
+                    while (cursor.moveToNext()) {
+                        if (cursor.isLast) {
+                            lastId = cursor.getString(cursor.getColumnIndex("_id"))
                         }
-                        jsonObject = JSONObject(keyData)
-                        val isHasEKey = jsonObject.has(eKey)
-                        if (!isHasEKey) { // 如果没有包含 eKey 字段，则重新进行加密
-                            jsonObject = dataEncrypt.encryptTrackData(jsonObject)
-                        }
-                        if (jsonObject.has(eKey)) {
-                            val key = jsonObject.getString(eKey) + "$" + jsonObject.getInt(keyVer)
-                            if (dataEncryptMap.containsKey(key)) {
-                                dataEncryptMap[key]!!.put(jsonObject.getString(payloads))
-                            } else {
-                                val jsonArray = JSONArray()
-                                jsonArray.put(jsonObject.getString(payloads))
-                                dataEncryptMap[key] = jsonArray
+                        try {
+                            keyData = cursor.getString(cursor.getColumnIndex(DbParams.KEY_DATA))
+                            keyData = parseData(keyData)
+                            if (TextUtils.isEmpty(keyData)) {
+                                continue
                             }
-                        } else {
-                            dataJsonArray.put(jsonObject)
+                            jsonObject = JSONObject(keyData)
+                            val isHasEKey = jsonObject.has(eKey)
+                            if (!isHasEKey) { // 如果没有包含 eKey 字段，则重新进行加密
+                                jsonObject = dataEncrypt.encryptTrackData(jsonObject)
+                            }
+                            if (jsonObject.has(eKey)) {
+                                val key = jsonObject.getString(eKey) + "$" + jsonObject.getInt(keyVer)
+                                if (dataEncryptMap.containsKey(key)) {
+                                    dataEncryptMap[key]!!.put(jsonObject.getString(payloads))
+                                } else {
+                                    val jsonArray = JSONArray()
+                                    jsonArray.put(jsonObject.getString(payloads))
+                                    dataEncryptMap[key] = jsonArray
+                                }
+                            } else {
+                                dataJsonArray.put(jsonObject)
+                            }
+                        } catch (e: Exception) {
+                            printStackTrace(e)
                         }
-                    } catch (e: Exception) {
-                        printStackTrace(e)
+                    }
+                    val dataEncryptJsonArray = JSONArray()
+                    for (key in dataEncryptMap.keys) {
+                        jsonObject = JSONObject()
+                        jsonObject.put(eKey, key.substring(0, key.indexOf("$")))
+                        jsonObject.put(keyVer, Integer.valueOf(key.substring(key.indexOf("$") + 1)))
+                        jsonObject.put(payloads, dataEncryptMap[key])
+                        jsonObject.put("flush_time", System.currentTimeMillis())
+                        dataEncryptJsonArray.put(jsonObject)
+                    }
+                    if (dataEncryptJsonArray.length() > 0) {
+                        data = dataEncryptJsonArray.toString()
+                    } else {
+                        data = dataJsonArray.toString()
+                        gzipType = DbParams.GZIP_DATA_EVENT
                     }
                 }
-                val dataEncryptJsonArray = JSONArray()
-                for (key in dataEncryptMap.keys) {
-                    jsonObject = JSONObject()
-                    jsonObject.put(eKey, key.substring(0, key.indexOf("$")))
-                    jsonObject.put(keyVer, Integer.valueOf(key.substring(key.indexOf("$") + 1)))
-                    jsonObject.put(payloads, dataEncryptMap[key])
-                    jsonObject.put("flush_time", System.currentTimeMillis())
-                    dataEncryptJsonArray.put(jsonObject)
-                }
-                if (dataEncryptJsonArray.length() > 0) {
-                    data = dataEncryptJsonArray.toString()
-                } else {
-                    data = dataJsonArray.toString()
-                    gzipType = DbParams.GZIP_DATA_EVENT
-                }
+            } catch (ex: Exception) {
+                printStackTrace(ex)
+            } finally {
+                cursor?.close()
             }
-        } catch (ex: Exception) {
-            printStackTrace(ex)
-        } finally {
-            cursor?.close()
         }
         return lastId?.let { arrayOf(it, data ?: "", gzipType) }
     }
