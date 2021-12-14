@@ -1,10 +1,8 @@
 package com.zj.analyticTest
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import androidx.viewpager2.widget.ViewPager2
 import com.zj.analyticSdk.CCAnalytic
 import com.google.android.material.tabs.TabLayout
@@ -17,7 +15,7 @@ class SecondActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_second)
         Log.e("onStart SecondActivity", "${intent.getStringExtra("111")}")
         val vp2 = findViewById<ViewPager2>(R.id.main_frag)
         val tab = findViewById<TabLayout>(R.id.main_tab)
@@ -38,18 +36,13 @@ class SecondActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * 埋点方法
-     * */
-    fun analyticOne(view: View) {
-        CCAnalytic.get()?.trackEvent("test event", "event" to "click")
+    override fun onStart() {
+        super.onStart()
+        CCAnalytic.get()?.trackPageStart(this::class.java.simpleName)
     }
 
-    /**
-     * 测试使用，不需要手动调用。
-     * */
-    fun toNext(view: View) {
-        startActivity(Intent(this, ThirdActivity::class.java))
+    override fun finish() {
+        setResult(-100)
+        super.finish()
     }
-
 }

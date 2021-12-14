@@ -1,10 +1,14 @@
 package com.zj.analyticTest
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import com.zj.analyticSdk.CCAnalytic
 import com.zj.analyticSdk.anno.PageAnalyticParams
+import com.zj.analyticTest.component.rv.ExposeActivity
+import com.zj.analyticTest.component.vp.ViewPagerExposeActivity
+import com.zj.analyticTest.component.vp2.ViewPager2ExposeActivity
 import com.zj.cf.setConstrainFragmentLifecycleCallBack
 
 
@@ -37,18 +41,27 @@ class MainActivity : BaseResultAbleActivity() {
     }
 
     /**
-     * 埋点方法
-     * */
-    fun analyticOne(view: View) {
-        CCAnalytic.get()?.trackEvent("test event", "event" to "click")
-    }
-
-    /**
      * 测试使用，不需要手动调用。
      * */
     fun toNext(view: View) {
-        startActivityForResult(SecondActivity::class.java.name, 300, params = arrayOf("111" to "asdasd")) { i, i2, intent ->
+        startActivityForResult(ThirdActivity::class.java.name, 400, params = arrayOf("111" to "asdasd")) { i, i2, intent ->
             Log.e("start act result ===> ", "rq = $i   rsp = $i2  param = ${intent?.getStringExtra("222")}")
         }
+    }
+
+    fun exposePager(view: View) {
+        startActivity(Intent(view.context, ViewPagerExposeActivity::class.java))
+    }
+
+    fun expose(view: View) {
+        startActivity(Intent(view.context, ExposeActivity::class.java))
+    }
+
+    fun exposeVp2(view: View) {
+        startActivity(Intent(view.context, ViewPager2ExposeActivity::class.java))
+    }
+
+    fun exposeView(view: View) {
+        startActivity(Intent(view.context, ThirdActivity::class.java))
     }
 }

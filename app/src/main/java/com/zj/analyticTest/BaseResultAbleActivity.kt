@@ -11,11 +11,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import java.io.Serializable
 
+@Suppress("unused")
 open class BaseResultAbleActivity : AppCompatActivity() {
 
     private val activityResultLauncher: ActivityResultLauncher<RequestInfo>
 
-    private data class RequestInfo(val cls: String, val requestCode: Int, val flags: Int?, val params: Map<String, Any?>)
+    init {
+        activityResultLauncher = this.registerForActivityResult(CusActivityContract(), ::onActivityResult)
+    }
+
     companion object {
 
         private val onRequestActivityState = mutableMapOf<String, MutableMap<Int, (Int, Int, Intent?) -> Unit>>()
@@ -49,8 +53,18 @@ open class BaseResultAbleActivity : AppCompatActivity() {
         fun BaseResultAbleActivity.startActivityForResult(clsPath: String, requestCode: Int, flags: Int? = null, activityOptionsCompat: ActivityOptionsCompat? = null, params: Array<Pair<String, Any?>>? = null, run: (Int, Int, Intent?) -> Unit) {
             val param = mutableMapOf<String, Any?>()
             params?.forEach { param[it.first] = it.second }
-            val input = RequestInfo(clsPath, requestCode, flags, param)
+            if (!onRequestActivityState.containsKey(clsPath)) {
+                onRequestActivityState[clsPath] = mutableMapOf()
+            }
+            val rqCods = arrayListOf(requestCode)
+            val cached = onRequestActivityState[clsPath]
+            if (!cached.isNullOrEmpty()) {
+                cached.keys.forEach {
+                    rqCods.add(it)
+                }
+            }
             onRequestActivityState[clsPath]?.put(requestCode, run)
+            val input = RequestInfo(clsPath, rqCods, flags, param)
             this.activityResultLauncher.launch(input, activityOptionsCompat)
         }
 
@@ -64,33 +78,16 @@ open class BaseResultAbleActivity : AppCompatActivity() {
         }
     }
 
-    init {
-        activityResultLauncher = this.registerForActivityResult(object : ActivityResultContract<RequestInfo, Triple<Int, Int, Intent?>>() {
-
-            override fun createIntent(context: Context, input: RequestInfo): Intent {
-                val i = Intent()
-                val cn = ComponentName(context, input.cls)
-                i.component = cn
-                input.flags?.let { i.flags = it }
-                input.params.forEach {
-                    val value = it.value
-                    if (value is Serializable) {
-                        i.putExtra(it.key, value)
-                    } else {
-                        throw IllegalArgumentException("intent params as must be a Serializable object!!")
-                    }
-                }
-                i.putExtra("cus_request_code", input.requestCode)
-                return i
+    private fun onActivityResult(result: Triple<RequestInfo, Int, Intent?>) {
+        val rqInfo = result.first
+        val rcl = onRequestActivityState[rqInfo.cls]
+        if (!rcl.isNullOrEmpty()) {
+            rqInfo.requestCods.forEach {
+                rcl.remove(it)?.invoke(it, result.second, result.third) ?: onResult(it, result.second, result.third)
             }
-
-            override fun parseResult(resultCode: Int, intent: Intent?): Triple<Int, Int, Intent?> {
-                val rq = intent?.getIntExtra("cus_request_code", -1) ?: -1
-                return Triple(rq, resultCode, intent)
+            if (rcl.isEmpty()) {
+                onRequestActivityState.remove(rqInfo.cls)
             }
-        }) {
-            onRequestActivityState[this::class.java.name]?.remove(it.first)?.invoke(it.first, it.second, it.third) ?: onResult(it.first, it.second, it.third)
-            if (onRequestActivityState[this::class.java.name].isNullOrEmpty()) onRequestActivityState.remove(this::class.java.name)
         }
     }
 
@@ -98,8 +95,36 @@ open class BaseResultAbleActivity : AppCompatActivity() {
         Log.e("RBaseActivity.onResult", "the activity requestCode $requestCode No suitable callback interface is found, the data will complete the callback in this extension function!")
     }
 
-    override fun finish() {
-        super.finish()
-        onRequestActivityState.remove(this::class.java.name)
+    private data class RequestInfo(val cls: String, val requestCods: MutableList<Int>, val flags: Int?, val params: Map<String, Any?>)
+
+    private class CusActivityContract : ActivityResultContract<RequestInfo, Triple<RequestInfo, Int, Intent?>>() {
+
+        private lateinit var rqInfo: RequestInfo
+
+        override fun createIntent(context: Context, input: RequestInfo): Intent {
+            val i = Intent()
+            val cn = ComponentName(context, input.cls)
+            i.component = cn
+            input.flags?.let { i.flags = it }
+            input.params.forEach {
+                val value = it.value
+                if (value is Serializable) {
+                    i.putExtra(it.key, value)
+                } else {
+                    throw IllegalArgumentException("intent params as must be a Serializable object!!")
+                }
+            }
+            this.rqInfo = input
+            return i
+        }
+
+        override fun parseResult(resultCode: Int, intent: Intent?): Triple<RequestInfo, Int, Intent?> {
+            return Triple(rqInfo, resultCode, intent)
+        }
+    }
+
+    override fun onDestroy() {
+        activityResultLauncher.unregister()
+        super.onDestroy()
     }
 }

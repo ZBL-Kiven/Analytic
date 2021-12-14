@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.res.Configuration
 import java.lang.IllegalStateException
 import java.lang.ref.WeakReference
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCallbacks2 {
 
@@ -19,7 +20,9 @@ internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCall
     private var application: Application? = null
     private var isInitLifecycleCallback = false
     private var runningTasksNum: Int = 0
-    private var isAppInBackgroundCurrent = false
+    private var appStateListeners = mutableMapOf<String, StatusChangeListener>()
+    private var inBackgroundCurrent = false
+    private var curCode: Int = 0
 
     private var curAppState = ""
 
@@ -43,27 +46,30 @@ internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCall
 
     override fun onActivityResumed(activity: Activity) {
         runningTasksNum++
-        if (isAppInBackgroundCurrent) {
-            isAppInBackgroundCurrent = false
+        if (inBackgroundCurrent) {
+            inBackgroundCurrent = false
             curAppState = "foreground"
         }
         if (curActiveInfo?.get() != activity) {
             curActiveInfo = WeakReference(activity)
         }
+        notifyStateStopped(false, activity.hashCode())
     }
 
     override fun onActivityPaused(activity: Activity) {
         runningTasksNum = runningTasksNum--.coerceAtLeast(0)
     }
 
-    override fun onActivityStopped(activity: Activity) {}
+    override fun onActivityStopped(activity: Activity) {
+        notifyStateStopped(true, activity.hashCode())
+    }
 
     override fun onActivityDestroyed(activity: Activity) {
         if (curActiveInfo?.get() == activity) {
             curActiveInfo?.clear()
         }
         if (runningTasksNum <= 0) {
-            PageTracker.analyticPageLeave(true)
+            PageTracker.onPageEnd()
         }
     }
 
@@ -72,15 +78,36 @@ internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCall
     override fun onConfigurationChanged(newConfig: Configuration) {}
 
     override fun onTrimMemory(level: Int) {
-        if (!isAppInBackgroundCurrent && level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
-            isAppInBackgroundCurrent = true
+        if (!inBackgroundCurrent && level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+            inBackgroundCurrent = true
             curAppState = "background"
-            PageTracker.analyticPageLeave(true)
+            notifyStateStopped(true, curActiveInfo?.get()?.hashCode())
+            PageTracker.onPageEnd()
         }
     }
 
-    fun getCurAppState(): String {
-        return curAppState
+    fun isAppInBackground(): Boolean {
+        return curAppState == "background"
+    }
+
+    fun addOnAppStateChangeListener(name: String, l: StatusChangeListener) {
+        this.appStateListeners[name] = l
+    }
+
+    fun removeAppStateChangeListener(name: String) {
+        this.appStateListeners.remove(name)
+    }
+
+    private fun notifyStateStopped(value: Boolean, code: Int? = null) {
+        appStateListeners.forEach {
+            val v = it.value
+            if (code == null || v.activityHashCode == code) {
+                if (v.lastState.get() != value) {
+                    v.lastState.set(value)
+                    v.l.invoke(value)
+                }
+            }
+        }
     }
 
     fun destroy() {
@@ -89,4 +116,6 @@ internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCall
         isInitLifecycleCallback = false
         runningTasksNum = 0
     }
+
+    data class StatusChangeListener(val activityHashCode: Int, val l: (Boolean) -> Unit, var lastState: AtomicBoolean = AtomicBoolean(false))
 }

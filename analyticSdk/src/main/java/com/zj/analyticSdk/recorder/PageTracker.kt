@@ -1,9 +1,7 @@
 package com.zj.analyticSdk.recorder
 
-import com.zj.analyticSdk.CALogs
 import com.zj.analyticSdk.CCAnalytic
 import org.json.JSONObject
-import java.lang.IllegalArgumentException
 import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
 
@@ -21,7 +19,7 @@ internal object PageTracker {
                 }
             }
             else -> {
-                onPageEnd(pageName)
+                onPageEnd()
                 CCAnalytic.get()?.startTimer(pageName)
                 cachedPageInfo = PageInfo(pageName, WeakReference(followedInfo))
                 val ev = CCAnalytic.getConfig().getEventNameBuilder()
@@ -30,10 +28,7 @@ internal object PageTracker {
         }
     }
 
-    fun onPageEnd(pageName: String? = cachedPageInfo?.pageName, properties: JSONObject? = null) {
-        if (pageName != cachedPageInfo?.pageName) {
-            CALogs.e("PageTracker", "$pageName is not active ,cur running is ${cachedPageInfo?.pageName}", IllegalArgumentException("You should call onPageStart and onPageEnd in pairs"))
-        }
+    fun onPageEnd(properties: JSONObject? = null) {
         analyticPageLeave(properties = properties)
         lastPageInfo = cachedPageInfo
         cachedPageInfo = null

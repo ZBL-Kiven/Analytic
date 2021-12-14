@@ -16,7 +16,8 @@
 
         <activity
             android:name="com.zj.analyticTest.MainActivity"
-            android:configChanges="screenLayout|keyboardHidden|screenSize|orientation">
+            android:configChanges="screenLayout|keyboardHidden|screenSize|orientation"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -24,6 +25,9 @@
         </activity>
         <activity android:name=".SecondActivity" />
         <activity android:name=".ThirdActivity" />
+        <activity android:name=".component.rv.ExposeActivity" />
+        <activity android:name=".component.vp.ViewPagerExposeActivity" />
+        <activity android:name=".component.vp2.ViewPager2ExposeActivity" />
     </application>
 
 </manifest>

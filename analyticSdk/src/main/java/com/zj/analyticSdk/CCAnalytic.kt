@@ -92,8 +92,8 @@ class CCAnalytic<T : CAConfigs>(private val config: T) {
         PageTracker.onPageStart(pageName, followedInfo, properties)
     }
 
-    fun trackPageEnd(pageName: String, properties: JSONObject? = null) {
-        PageTracker.onPageEnd(pageName, properties)
+    fun trackPageEnd(properties: JSONObject? = null) {
+        PageTracker.onPageEnd(properties)
     }
 
     fun uploadTest() {
