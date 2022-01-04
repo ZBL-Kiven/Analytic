@@ -11,7 +11,7 @@ object CAConfig : CAConfigs {
     override val isDebugEnabled: () -> Boolean = { true }
     override val uploadInterval: Long = 10000L
     override val uploadMaxSize: Int = 5
-    override fun autoUploadAble(): Boolean = false
+    override fun autoUploadAble(): Boolean = true
 
     //服务器地址
     override fun getServerUrl(): String {

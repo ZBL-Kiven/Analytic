@@ -91,7 +91,6 @@ internal abstract class DataOperation(mContext: Context) {
 
     protected fun <R> withCR(run: (ContentResolver) -> R?): R? {
         return synchronized(contentResolver) {
-            Log.e(tag, "call withCR in thread [${Thread.currentThread().name}]")
             run(contentResolver)
         }
     }

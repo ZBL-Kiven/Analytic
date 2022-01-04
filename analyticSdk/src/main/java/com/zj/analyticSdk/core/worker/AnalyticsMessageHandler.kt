@@ -3,12 +3,14 @@ package com.zj.analyticSdk.core.worker
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import com.zj.analyticSdk.CALogs
 import com.zj.analyticSdk.CCAnalytic
 import com.zj.analyticSdk.core.router.CheckTask
 import com.zj.analyticSdk.core.HandleType
 import com.zj.analyticSdk.core.router.RecordTask
 import com.zj.analyticSdk.core.router.UploadTask
 import com.zj.analyticSdk.persistence.DBHelper
+import com.zj.analyticSdk.utils.IntermittentTimerUtils
 import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
@@ -64,6 +66,12 @@ internal class AnalyticsMessageHandler(looper: Looper) : Handler(looper), MsgDea
             HandleType.ANALYTIC.code -> {
                 maxUploadIntervalNum++
                 RecordTask(info, this).run()
+            }
+            HandleType.FLUSH_INTERMITTENT.code -> {
+                (info.data as? EventInfo.FlushInfo)?.let {
+                    IntermittentTimerUtils.flushIfExists(it)
+                } ?: CALogs.e("FLUSH_INTERMITTENT", "the data is not instance of FlushInfo? ，it's shouldn't happen!")
+                onDeal(isSuccess = true, retry = false, info = info)
             }
             HandleType.CLEAR.code -> {
                 maxUploadIntervalNum = 0

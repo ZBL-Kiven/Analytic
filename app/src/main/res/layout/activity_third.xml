@@ -1,10 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/third_tv"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:text="ThirdAct"
-    android:textColor="#313"
-    android:textSize="28sp"
-    android:textStyle="bold" />
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginBottom="10dp"
+        android:background="#cac"
+        android:gravity="center"
+        android:onClick="dotOne"
+        android:text="dot for once"
+        android:textColor="#313"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#acc"
+        android:gravity="center"
+        android:onClick="flushDots"
+        android:text="flush dots"
+        android:textColor="#313"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/third_tv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="ThirdAct"
+        android:textColor="#313"
+        android:textSize="28sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

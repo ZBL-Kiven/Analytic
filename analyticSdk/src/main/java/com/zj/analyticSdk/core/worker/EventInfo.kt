@@ -7,9 +7,15 @@ internal class EventInfo private constructor(val handleType: HandleType) {
 
     companion object {
 
-        fun record(eventName: String, jsonObject: JSONObject, withData: Any? = null): EventInfo {
+        fun record(eventName: String, jsonObject: JSONObject, intermittentType: IntermittentType?, withData: Any? = null): EventInfo {
             return EventInfo(HandleType.ANALYTIC).apply {
-                data = RecordInfo(eventName, jsonObject, withData)
+                data = RecordInfo(eventName, jsonObject, intermittentType, withData)
+            }
+        }
+
+        fun flushIntermittentInfo(eventName: String? = null): EventInfo {
+            return EventInfo(HandleType.FLUSH_INTERMITTENT).apply {
+                data = FlushInfo(eventName)
             }
         }
 
@@ -28,5 +34,7 @@ internal class EventInfo private constructor(val handleType: HandleType) {
 
     var data: Any? = null; private set
 
-    data class RecordInfo(val eventName: String, val jsonObject: JSONObject, val withData: Any? = null)
+    data class RecordInfo(val eventName: String, val jsonObject: JSONObject, val intermittentType: IntermittentType?, val withData: Any? = null)
+
+    data class FlushInfo(val eventName: String?)
 }

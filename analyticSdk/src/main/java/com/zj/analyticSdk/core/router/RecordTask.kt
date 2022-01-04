@@ -7,6 +7,7 @@ import com.zj.analyticSdk.core.worker.MsgDealIn
 import com.zj.analyticSdk.persistence.DBHelper
 import com.zj.analyticSdk.recorder.BasePropertyCollector
 import com.zj.analyticSdk.recorder.PageTracker
+import com.zj.analyticSdk.utils.IntermittentTimerUtils
 import java.lang.Exception
 
 internal class RecordTask(private val info: EventInfo, private val handleIn: MsgDealIn) : Runnable {
@@ -20,9 +21,13 @@ internal class RecordTask(private val info: EventInfo, private val handleIn: Msg
                 PageTracker.trackPageInfo(recordInfo.jsonObject)
             }
             val merged = CCAnalytic.getConfig().onMergeProperties(recordInfo.eventName, recordInfo.jsonObject, params) ?: throw NullPointerException("recording params must not be null ,transfer by CAConfig.onMergeProperties")
-            val buildParams = CCAnalytic.getConfig().beforeEvent(recordInfo.eventName, merged) ?: throw NullPointerException("recording params must not be null ,transfer by CAConfig.beforeEvent")
-            DBHelper.getInstance().addJSON(buildParams)
-            CALogs.i("CCA.RecordTask", buildParams.toString(), null)
+            if (recordInfo.intermittentType != null) {
+                IntermittentTimerUtils.putOrUpdate(recordInfo.eventName, merged, recordInfo.intermittentType)
+            } else {
+                val buildParams = CCAnalytic.getConfig().beforeEvent(recordInfo.eventName, merged) ?: throw NullPointerException("recording params must not be null ,transfer by CAConfig.beforeEvent")
+                DBHelper.getInstance().addJSON(buildParams)
+                CALogs.i("CCA.RecordTask", buildParams.toString(), null)
+            }
             handleIn.onDeal(isSuccess = true, retry = false, info = info)
         } catch (e: Exception) {
             handleIn.onDeal(isSuccess = false, retry = false, info = info)
