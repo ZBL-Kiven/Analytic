@@ -1,6 +1,5 @@
 package com.zj.analyticTest
 
-import android.util.Log
 import com.zj.analyticSdk.CAConfigs
 import org.json.JSONObject
 
@@ -14,6 +13,10 @@ object CAConfig : CAConfigs {
     override val uploadMaxSize: Int = 5
     override fun autoUploadAble(): Boolean = true
 
+    override fun logFrequency(): Int {
+        return CAConfigs.LOG_INTERMITTENT_RECORD.or(CAConfigs.LOG_UPLOAD)
+    }
+
     //服务器地址
     override fun getServerUrl(): String {
         return "https://data.ccdev.lerjin.com/track_new?access_token=6228feb1-2a09-432a-a923-bc6aaf89f91e"
@@ -24,10 +27,8 @@ object CAConfig : CAConfigs {
         return super.addDefaultParam(eventName, withData, baseProperties)
     }
 
-    //当数据完成所有构建即将入库。
-    override fun beforeEvent(eventName: String, properties: JSONObject): JSONObject? {
-        Log.e("on-cc analytic --- ", properties.toString())
-        return super.beforeEvent(eventName, properties)
+    override fun onMergeProperties(eventName: String, source: JSONObject, dest: JSONObject): JSONObject? {
+        dest.put("private", source)
+        return dest
     }
-
 }

@@ -3,17 +3,18 @@ package com.zj.analyticSdk.persistence
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.zj.analyticSdk.CAConfigs
 import com.zj.analyticSdk.CALogs.i
 
 internal class DataDBHelper(context: Context?) : SQLiteOpenHelper(context, DbParams.DATABASE_NAME, null, DbParams.DATABASE_VERSION) {
     override fun onCreate(db: SQLiteDatabase) {
-        i(TAG, "Creating a new Analytics DB", null)
+        i(CAConfigs.LOG_ALL, TAG, "Creating a new Analytics DB", null)
         db.execSQL(CREATE_EVENTS_TABLE)
         db.execSQL(EVENTS_TIME_INDEX)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        i(TAG, "Upgrading app, replacing Analytics DB", null)
+        i(CAConfigs.LOG_ALL, TAG, "Upgrading app, replacing Analytics DB", null)
         db.execSQL(String.format("DROP TABLE IF EXISTS %s", DbParams.TABLE_EVENTS))
         db.execSQL(CREATE_EVENTS_TABLE)
         db.execSQL(EVENTS_TIME_INDEX)

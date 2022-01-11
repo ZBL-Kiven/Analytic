@@ -5,7 +5,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
 import android.text.TextUtils
-import android.util.Log
+import com.zj.analyticSdk.CAConfigs
 import com.zj.analyticSdk.CALogs
 import com.zj.analyticSdk.CCAnalytic
 import com.zj.analyticSdk.persistence.DbParams
@@ -77,7 +77,7 @@ internal abstract class DataOperation(mContext: Context) {
      */
     fun deleteDataLowMemory(uri: Uri): Int {
         if (belowMemThreshold()) {
-            CALogs.i(tag, "There is not enough space left on the device to store events, so will delete 100 oldest events")
+            CALogs.i(CAConfigs.LOG_ALL, tag, "There is not enough space left on the device to store events, so will delete 100 oldest events")
             val eventsData = queryData(uri, 100) ?: return DbParams.DB_OUT_OF_MEMORY_ERROR
             eventsData[0]?.let {
                 deleteData(uri, it)

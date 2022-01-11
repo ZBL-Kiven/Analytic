@@ -2,6 +2,7 @@ package com.zj.analyticSdk.core.data
 
 import android.net.Uri
 import android.text.TextUtils
+import com.zj.analyticSdk.CAConfigs
 import com.zj.analyticSdk.CALogs
 import com.zj.analyticSdk.CCAnalytic
 import com.zj.analyticSdk.core.exceptions.ConnectErrorException
@@ -28,7 +29,7 @@ object UpdateHttpTask {
             val url = URL(path)
             connection = url.openConnection() as? HttpURLConnection
             if (connection == null) {
-                CALogs.i(TAG, String.format("can not connect %s, it shouldn't happen", url.toString()), null)
+                CALogs.e(CAConfigs.LOG_SYSTEM, TAG, String.format("can not connect %s, it shouldn't happen", url.toString()), null)
                 return
             }
             val sslFactory = CCAnalytic.getConfig().getSSLSocketFactory()
@@ -56,7 +57,7 @@ object UpdateHttpTask {
             bout.write(query?.toByteArray(StandardCharsets.UTF_8))
             bout.flush()
             val responseCode = connection.responseCode
-            CALogs.i(TAG, "responseCode: $responseCode")
+            CALogs.i(CAConfigs.LOG_UPLOAD, TAG, "responseCode: $responseCode")
             if (!isRedirects && needRedirects(responseCode)) {
                 val location = getLocation(connection, path)
                 if (!location.isNullOrEmpty()) {
@@ -78,11 +79,11 @@ object UpdateHttpTask {
             if (CCAnalytic.getConfig().isDebugEnabled()) {
                 val jsonMessage: String = JSONUtils.formatJson(rawMessage) // Status code 200-300 are considered correct
                 if (responseCode >= HttpURLConnection.HTTP_OK && responseCode < HttpURLConnection.HTTP_MULT_CHOICE) {
-                    CALogs.i(TAG, "valid message: \n$jsonMessage")
+                    CALogs.i(CAConfigs.LOG_SYSTEM, TAG, "valid message: \n$jsonMessage")
                 } else {
-                    CALogs.i(TAG, "invalid message: \n$jsonMessage")
-                    CALogs.i(TAG, String.format(Locale.CHINA, "ret_code: %d", responseCode))
-                    CALogs.i(TAG, String.format(Locale.CHINA, "ret_content: %s", response))
+                    CALogs.i(CAConfigs.LOG_SYSTEM, TAG, "invalid message: \n$jsonMessage")
+                    CALogs.i(CAConfigs.LOG_SYSTEM, TAG, String.format(Locale.ENGLISH, "ret_code: %d", responseCode))
+                    CALogs.i(CAConfigs.LOG_SYSTEM, TAG, String.format(Locale.ENGLISH, "ret_content: %s", response))
                 }
             }
             if (responseCode < HttpURLConnection.HTTP_OK || responseCode >= HttpURLConnection.HTTP_MULT_CHOICE) { // 校验错误
@@ -125,28 +126,28 @@ object UpdateHttpTask {
             try {
                 bout.close()
             } catch (e: Exception) {
-                CALogs.i(TAG, e.message)
+                CALogs.e(CAConfigs.LOG_SYSTEM, TAG, e.message)
             }
         }
         if (null != out) {
             try {
                 out.close()
             } catch (e: Exception) {
-                CALogs.i(TAG, e.message)
+                CALogs.e(CAConfigs.LOG_SYSTEM, TAG, e.message)
             }
         }
         if (null != `in`) {
             try {
                 `in`.close()
             } catch (e: Exception) {
-                CALogs.i(TAG, e.message)
+                CALogs.e(CAConfigs.LOG_SYSTEM, TAG, e.message)
             }
         }
         if (null != connection) {
             try {
                 connection.disconnect()
             } catch (e: Exception) {
-                CALogs.i(TAG, e.message)
+                CALogs.e(CAConfigs.LOG_SYSTEM, TAG, e.message)
             }
         }
     }

@@ -7,16 +7,16 @@ import android.util.Log
 import android.view.View
 import com.zj.analyticSdk.CCAnalytic
 import com.zj.analyticSdk.anno.PageAnalyticParams
-import com.zj.analyticSdk.core.worker.IntermittentType
 import com.zj.analyticSdk.expose.ExposeUtils
 import com.zj.analyticSdk.expose.p.BaseExposeIn
+import org.json.JSONObject
 import java.util.*
 
 class ThirdActivity : AppCompatActivity(), BaseExposeIn<Int> {
 
     var p: Int = 0; get() = field++
 
-    @PageAnalyticParams("asdasfqdasdafq111") var pa = "asdbaskfhbjksfq"
+    @PageAnalyticParams("thirdActivity_pending") var pa = "aczxzascs"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +28,7 @@ class ThirdActivity : AppCompatActivity(), BaseExposeIn<Int> {
         }
         Timer().schedule(object : TimerTask() {
             override fun run() {
-                CCAnalytic.get()?.trackEvent("Dots!!!!!", "aaaaa" to "$p", intermittentType = IntermittentType.STAY_IF_NULL)
+                CCAnalytic.get()?.trackEvent("Dots!!!!!", "aaaaa" to "$p", intermittentType = true)
             }
         }, 3000)
     }
@@ -36,7 +36,15 @@ class ThirdActivity : AppCompatActivity(), BaseExposeIn<Int> {
     override fun onStart() {
         super.onStart()
         CCAnalytic.get()?.trackPageStart(this::class.java.simpleName, this)
-        CCAnalytic.get()?.trackEvent("Dots!!!!!", "bbbbb" to "askjdnkasjd", intermittentType = IntermittentType.STAY_IF_NULL)
+        val jo = JSONObject()
+        jo.put("begin_game_time", "${System.currentTimeMillis()}")
+        jo.put("play_duration", "3000")
+        jo.put("1", "ashdjbajshfjasbdq")
+        jo.put("2", "ashdjbajshfjasbdq")
+        jo.put("3", "ashdjbajshfjasbdq")
+        jo.put("4", "ashdjbajshfjasbdq")
+        jo.put("5", "ashdjbajshfjasbdq")
+        CCAnalytic.get()?.trackEvent("Dots!!!!!", jo, intermittentType = true)
     }
 
     override fun onAttached(data: Int?) {
@@ -44,12 +52,11 @@ class ThirdActivity : AppCompatActivity(), BaseExposeIn<Int> {
     }
 
     override fun onDetached(data: Int?) {
-
-        //        Log.e("------- ", "onDetached  $data   ${this.hashCode()}")
+        CCAnalytic.get()?.flushAllIntermittentInfo()
     }
 
     fun dotOne(view: View) {
-        CCAnalytic.get()?.trackEvent("Dots!!!!!", "aaaaa" to "$p", intermittentType = IntermittentType.STAY_IF_NULL)
+        CCAnalytic.get()?.trackEvent("Dots!!!!!", "aaaaa" to "$p", intermittentType = true)
     }
 
     fun flushDots(view: View) {

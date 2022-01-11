@@ -7,6 +7,23 @@ import javax.net.ssl.SSLSocketFactory
 
 interface CAConfigs {
 
+    companion object {
+
+        const val LOG_SYSTEM = 0
+
+        const val LOG_RECORD = 1
+
+        const val LOG_INTERMITTENT_RECORD = 2
+
+        const val LOG_INTERMITTENT_FLUSH = 4
+
+        const val LOG_BEFORE_EVENT = 8
+
+        const val LOG_UPLOAD = 16
+
+        const val LOG_ALL = 32
+    }
+
     val maxCacheSize: Long
 
     val isLogEnabled: () -> Boolean
@@ -18,6 +35,8 @@ interface CAConfigs {
     val uploadMaxSize: Int
 
     fun getServerUrl(): String?
+
+    fun logFrequency(): Int = LOG_ALL
 
     fun autoUploadAble(): Boolean = true
 

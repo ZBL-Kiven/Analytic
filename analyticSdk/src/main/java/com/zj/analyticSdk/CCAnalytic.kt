@@ -4,7 +4,6 @@ import android.app.Application
 import com.zj.analyticSdk.utils.AppInfoUtils
 import com.zj.analyticSdk.utils.TimerTrackerUtils
 import com.zj.analyticSdk.core.worker.EventInfo
-import com.zj.analyticSdk.core.worker.IntermittentType
 import com.zj.analyticSdk.core.worker.WorkManagerQueue
 import com.zj.analyticSdk.persistence.DBHelper
 import com.zj.analyticSdk.persistence.encrypt.CCAnalyticsEncrypt
@@ -80,21 +79,21 @@ class CCAnalytic<T : CAConfigs>(private val config: T) {
      * @see trackEvent
      * */
     @SafeVarargs
-    fun trackEvent(eventName: String, vararg params: Pair<String, Any>, intermittentType: IntermittentType? = null) {
+    fun trackEvent(eventName: String, vararg params: Pair<String, Any>, intermittentType: Boolean = false) {
         this.trackEvent(eventName, arrayToMap(*params), intermittentType = intermittentType)
     }
 
     /**
      * @see trackEvent
      * */
-    fun trackEvent(eventName: String, params: Map<String, Any?>, intermittentType: IntermittentType? = null) {
+    fun trackEvent(eventName: String, params: Map<String, Any?>, intermittentType: Boolean = false) {
         this.trackEvent(eventName, JSONObject(params), intermittentType = intermittentType)
     }
 
     /**
      * @see trackEvent
      * */
-    fun trackEvent(eventName: String, params: Map<String, Any?>, withData: Any?, intermittentType: IntermittentType? = null) {
+    fun trackEvent(eventName: String, params: Map<String, Any?>, withData: Any?, intermittentType: Boolean = false) {
         this.trackEvent(eventName, JSONObject(params), withData, intermittentType = intermittentType)
     }
 
@@ -115,7 +114,7 @@ class CCAnalytic<T : CAConfigs>(private val config: T) {
      * */
     fun flushAndUploadNow() {
         if (config.autoUploadAble()) {
-            CALogs.e("CCA.Test", "can not call upload with auto upload configuration running!")
+            CALogs.e(CAConfigs.LOG_SYSTEM, "CCA.Test", "can not call upload with auto upload configuration running!")
             return
         }
         WorkManagerQueue.push(EventInfo.upload())
@@ -130,7 +129,7 @@ class CCAnalytic<T : CAConfigs>(private val config: T) {
      * if current event is exists, the new object will change the property value by the same keys.
      * cached events will remove the null value properties.
      * */
-    fun trackEvent(eventName: String, jsonObject: JSONObject, withData: Any? = null, intermittentType: IntermittentType? = null) {
+    fun trackEvent(eventName: String, jsonObject: JSONObject, withData: Any? = null, intermittentType: Boolean = false) {
         if (eventName.isNotEmpty() || jsonObject.length() > 0) {
             val info = EventInfo.record(eventName, jsonObject, intermittentType, withData)
             WorkManagerQueue.push(info)

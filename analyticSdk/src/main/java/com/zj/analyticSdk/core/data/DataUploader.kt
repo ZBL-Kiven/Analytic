@@ -2,6 +2,7 @@ package com.zj.analyticSdk.core.data
 
 import android.content.Context
 import android.text.TextUtils
+import com.zj.analyticSdk.CAConfigs
 import com.zj.analyticSdk.CALogs
 import com.zj.analyticSdk.CCAnalytic
 import com.zj.analyticSdk.core.data.UpdateHttpTask.sendHttpRequest
@@ -69,11 +70,11 @@ class DataUploader(private val mContext: Context) {
                     errorMessage = "Exception: " + e.message
                 } finally {
                     if (!TextUtils.isEmpty(errorMessage)) {
-                        CALogs.e(TAG, errorMessage)
+                        CALogs.e(CAConfigs.LOG_SYSTEM, TAG, errorMessage)
                     }
                     if (deleteEvents || CCAnalytic.getConfig().isDebugEnabled()) {
                         lastId?.let { count = mDbAdapter.cleanupEvents(it) }
-                        CALogs.i(TAG, String.format(Locale.CHINA, "Events flushed. [left = %d]", count))
+                        CALogs.i(CAConfigs.LOG_UPLOAD, TAG, String.format(Locale.CHINA, "Events flushed. [left = %d]", count))
                     } else {
                         count = 0
                     }
@@ -111,24 +112,24 @@ class DataUploader(private val mContext: Context) {
 
     private fun canSend(): Boolean {
         if (!CCAnalytic.getConfig().isNetworkRequestEnable()) {
-            CALogs.i(TAG, "NetworkRequest is closed！")
+            CALogs.i(CAConfigs.LOG_UPLOAD, TAG, "NetworkRequest is closed！")
             return false
         }
         if (CCAnalytic.getConfig().getServerUrl().isNullOrEmpty()) {
-            CALogs.i(TAG, "Server url is null or empty.")
+            CALogs.i(CAConfigs.LOG_SYSTEM, TAG, "Server url is null or empty.")
             return false
         }
         if (!CCAnalytic.isMainProgress()) {
-            CALogs.i(TAG, "cannot upload in other progress.")
+            CALogs.i(CAConfigs.LOG_SYSTEM, TAG, "cannot upload in other progress.")
             return false
         }
         if (!NetworkUtils.isNetworkAvailable(mContext)) {
-            CALogs.i(TAG, "net work is available to send.")
+            CALogs.i(CAConfigs.LOG_UPLOAD, TAG, "net work is available to send.")
             return false
         }
         val networkType: String = NetworkUtils.networkType(mContext)
         if (!NetworkUtils.isShouldFlush(networkType, CCAnalytic.getConfig().getNetworkFlushPolicy())) {
-            CALogs.i(TAG, String.format("cannot send data with current network , type is %s！", networkType))
+            CALogs.i(CAConfigs.LOG_UPLOAD, TAG, String.format("cannot send data with current network , type is %s！", networkType))
             return false
         }
         return true

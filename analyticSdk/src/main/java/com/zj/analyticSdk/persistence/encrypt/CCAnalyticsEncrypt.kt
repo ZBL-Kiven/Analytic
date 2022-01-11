@@ -3,6 +3,7 @@ package com.zj.analyticSdk.persistence.encrypt
 import android.content.Context
 import android.content.SharedPreferences
 import android.text.TextUtils
+import com.zj.analyticSdk.CAConfigs
 import com.zj.analyticSdk.CALogs
 import com.zj.analyticSdk.UTL
 import org.json.JSONException
@@ -33,15 +34,14 @@ class CCAnalyticsEncrypt(private val context: Context, private val persistentSec
     private var mSecreteKey: SecreteKey? = null
 
     /**
-     * RSA 加密 AES 密钥后的值
+     * RSA encrypted value after AES key
      */
     private var mEKey: String? = null
 
     /**
-     * 针对数据进行加密
-     *
-     * @param jsonObject，需要加密的数据
-     * @return 加密后的数据
+     * Encrypt data
+     * @param jsonObject, data to be encrypted
+     * @return encrypted data
      */
     fun encryptTrackData(jsonObject: JSONObject): JSONObject {
         try {
@@ -67,16 +67,12 @@ class CCAnalyticsEncrypt(private val context: Context, private val persistentSec
         return jsonObject
     }
 
-    /**
-     * 保存密钥
-     *
-     * @param secreteKey SecreteKey
-     */
     fun saveSecretKey(secreteKey: SecreteKey) {
         try {
-            CALogs.i(TAG, "[saveSecretKey] key = " + secreteKey.key.toString() + " ,v = " + secreteKey.version)
             if (persistentSecretKey != null) {
-                persistentSecretKey.saveSecretKey(secreteKey) // 同时删除本地的密钥
+                persistentSecretKey.saveSecretKey(secreteKey)
+
+                // Also delete the local key
                 saveLocalSecretKey("")
             } else {
                 saveLocalSecretKey(secreteKey.toString())
@@ -86,11 +82,6 @@ class CCAnalyticsEncrypt(private val context: Context, private val persistentSec
         }
     }
 
-    /**
-     * 公钥是否为空
-     *
-     * @return true，为空。false，不为空
-     */
     val isRSASecretKeyNull: Boolean
         get() {
             try {
@@ -103,22 +94,21 @@ class CCAnalyticsEncrypt(private val context: Context, private val persistentSec
         }
 
     /**
-     * 检查 RSA 密钥信息是否和本地一致
-     *
-     * @param version 版本号
-     * @param key 密钥信息
-     * @return -1 是本地密钥信息为空，-2 是相同，其它是不相同
+     * Check whether the RSA key information is the same as the local one
+     * @param version version number
+     * @param key key information
+     * @return -1 means the local key information is empty, -2 means the same, others are different
      */
     fun checkRSASecretKey(version: String, key: String): String {
         val tip = ""
         try {
             val secreteKey: SecreteKey = loadSecretKey()
             return if (TextUtils.isEmpty(secreteKey.key)) {
-                "密钥验证不通过，App 端密钥为空"
+                "Key verification failed, App-side key is empty"
             } else if (version == secreteKey.version.toString() + "" && key == secreteKey.key) {
-                "密钥验证通过，所选密钥与 App 端密钥相同"
+                "Key verification passed, the selected key is the same as the App-side key"
             } else {
-                "密钥验证不通过，所选密钥与 App 端密钥不相同。所选密钥版本:" + version + "，App 端密钥版本:" + secreteKey.version
+                "Key verification failed, the selected key is not the same as the app-side key. Selected key version: " + version + ", App-side key version: " + secreteKey.version
             }
         } catch (ex: Exception) {
             CALogs.printStackTrace(ex)
@@ -127,15 +117,14 @@ class CCAnalyticsEncrypt(private val context: Context, private val persistentSec
     }
 
     /**
-     * AES 加密
-     *
-     * @param key AES 加密秘钥
-     * @param content 加密内容
-     * @return AES 加密后的数据
+     * AES encryption
+     * @param key AES encryption key
+     * @param content encrypted content
+     * @return AES encrypted data
      */
     private fun aesEncrypt(key: ByteArray?, content: String): String? {
         try {
-            val random = Random() // 随机生成初始化向量
+            val random = Random()
             val ivBytes = ByteArray(16)
             random.nextBytes(ivBytes)
             val contentBytes = gzipEventData(content)
@@ -155,11 +144,10 @@ class CCAnalyticsEncrypt(private val context: Context, private val persistentSec
     }
 
     /**
-     * RSA 加密
-     *
-     * @param rsaPublicKey，公钥秘钥
-     * @param content，加密内容
-     * @return 加密后的数据
+     * RSA encryption
+     * @param rsaPublicKey, public key
+     * @param content, encrypted content
+     * @return encrypted data
      */
     private fun rsaEncrypt(rsaPublicKey: String, content: ByteArray?): String? {
         if (TextUtils.isEmpty(rsaPublicKey)) {
@@ -177,7 +165,7 @@ class CCAnalyticsEncrypt(private val context: Context, private val persistentSec
             var offSet = 0
             var cache: ByteArray
 
-            /** RSA 最大加密明文大小：1024 位公钥：117，2048 为公钥：245*/
+            //RSA Maximum encrypted plaintext size: 1024 bits Public key: 117, 2048 is public key: 245
 
             val maxEncryptSize = 245
             while (contentLen - offSet > 0) {
@@ -198,12 +186,6 @@ class CCAnalyticsEncrypt(private val context: Context, private val persistentSec
         return null
     }
 
-    /**
-     * 压缩事件
-     *
-     * @param record 压缩
-     * @return 压缩后事件
-     */
     private fun gzipEventData(record: String): ByteArray? {
         var gzipOutputStream: GZIPOutputStream? = null
         return try {
@@ -227,7 +209,7 @@ class CCAnalyticsEncrypt(private val context: Context, private val persistentSec
     }
 
     /**
-     * 随机生成 AES 加密秘钥
+     * Randomly generated AES encryption key
      */
     @Throws(NoSuchAlgorithmException::class)
     private fun generateAESKey(secreteKey: SecreteKey?) {
@@ -240,11 +222,6 @@ class CCAnalyticsEncrypt(private val context: Context, private val persistentSec
         }
     }
 
-    /**
-     * 存储密钥
-     *
-     * @param key 密钥
-     */
     private fun saveLocalSecretKey(key: String) {
         val preferences: SharedPreferences = UTL.getSharedPreferences(context)
         val editor = preferences.edit()
@@ -252,11 +229,6 @@ class CCAnalyticsEncrypt(private val context: Context, private val persistentSec
         editor.apply()
     }
 
-    /**
-     * 加载密钥
-     *
-     * @throws JSONException 异常
-     */
     @Throws(JSONException::class)
     private fun loadSecretKey(): SecreteKey {
         return if (persistentSecretKey != null) {
@@ -266,9 +238,6 @@ class CCAnalyticsEncrypt(private val context: Context, private val persistentSec
         }
     }
 
-    /**
-     * 从 App 端读取密钥
-     */
     private fun readAppKey(): SecreteKey {
         var rsaPublicKey: String? = null
         var rsaVersion = 0
@@ -277,15 +246,10 @@ class CCAnalyticsEncrypt(private val context: Context, private val persistentSec
             rsaPublicKey = rsaPublicKeyVersion.key
             rsaVersion = rsaPublicKeyVersion.version
         }
-        CALogs.i(TAG, "readAppKey [key = $rsaPublicKey ,v = $rsaVersion]")
+        CALogs.i(CAConfigs.LOG_ALL, TAG, "readAppKey [key = $rsaPublicKey ,v = $rsaVersion]")
         return SecreteKey(rsaPublicKey, rsaVersion)
     }
 
-    /**
-     * 从 SDK 端读取密钥
-     *
-     * @throws JSONException 异常
-     */
     @Throws(JSONException::class)
     private fun readLocalKey(): SecreteKey {
         var rsaPublicKey: String? = null
@@ -297,7 +261,7 @@ class CCAnalyticsEncrypt(private val context: Context, private val persistentSec
             rsaPublicKey = jsonObject.optString("key", "")
             rsaVersion = jsonObject.optInt("version", KEY_VERSION_DEFAULT)
         }
-        CALogs.i(TAG, "readLocalKey [key = $rsaPublicKey ,v = $rsaVersion]")
+        CALogs.i(CAConfigs.LOG_ALL, TAG, "readLocalKey [key = $rsaPublicKey ,v = $rsaVersion]")
         return SecreteKey(rsaPublicKey, rsaVersion)
     }
 

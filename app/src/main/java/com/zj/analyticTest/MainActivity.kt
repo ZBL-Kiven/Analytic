@@ -1,8 +1,10 @@
 package com.zj.analyticTest
 
 import android.content.Intent
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.View
 import com.zj.analyticSdk.CCAnalytic
 import com.zj.analyticSdk.anno.PageAnalyticParams

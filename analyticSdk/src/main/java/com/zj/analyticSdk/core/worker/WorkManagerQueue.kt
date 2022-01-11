@@ -7,6 +7,7 @@ import java.lang.Exception
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.Boolean
 
 @Suppress("unused")
 internal object WorkManagerQueue : MsgDealIn {

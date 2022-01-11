@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.zj.analyticSdk.CCAnalytic
 import com.zj.analyticSdk.persistence.DbParams
+import com.zj.analyticSdk.utils.IntermittentTimerUtils.PROPER_NAME
+import com.zj.analyticSdk.utils.IntermittentTimerUtils.getPropName
 import org.json.JSONObject
 
 internal object SpUtils {
@@ -20,20 +22,27 @@ internal object SpUtils {
         }
     }
 
-    fun String.poll(): JSONObject? {
+    fun String.pollIntermittent(): JSONObject? {
         val s = kotlin.runCatching {
             val s = sp.getString(this, null) ?: return null
             JSONObject(s)
         }.getOrNull()
-        sp.edit().remove(this).apply()
+        sp.edit().let {
+            if (!this.endsWith(PROPER_NAME)) {
+                it.remove(getPropName(this))
+            }
+            it.remove(this)
+        }.apply()
         return s
     }
 
-    fun pollAll(): List<JSONObject> {
+    fun pollAllIntermittent(): List<JSONObject> {
         val lst = arrayListOf<JSONObject>()
-        sp.all?.forEach {
-            val s = it.value.toString()
-            if (s.isNotEmpty()) lst.add(JSONObject(s))
+        sp.all?.forEach { (k, v) ->
+            if (!k.endsWith(PROPER_NAME)) {
+                val s = v.toString()
+                if (s.isNotEmpty()) lst.add(JSONObject(s))
+            }
         }
         sp.edit().clear().apply()
         return lst

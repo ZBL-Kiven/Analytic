@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteException
 import android.net.Uri
 import android.text.TextUtils
+import com.zj.analyticSdk.CAConfigs
 import com.zj.analyticSdk.CALogs
 import com.zj.analyticSdk.persistence.DbParams
 import org.json.JSONObject
@@ -61,7 +62,8 @@ internal class EventDataOperation(mContext: Context) : DataOperation(mContext) {
                             lastId = cursor.getString(id)
                         }
                         try {
-                            keyData = cursor.getString(cursor.getColumnIndex(DbParams.KEY_DATA))
+                            val index = cursor.getColumnIndex(DbParams.KEY_DATA)
+                            keyData = cursor.getString(index)
                             keyData = parseData(keyData)
                             if (!TextUtils.isEmpty(keyData)) {
                                 dataBuilder.append(keyData, 0, keyData.length - 1).append(flushTime).append(System.currentTimeMillis()).append("}").append(suffix)
@@ -84,7 +86,7 @@ internal class EventDataOperation(mContext: Context) : DataOperation(mContext) {
                 }
 
             } catch (e: SQLiteException) {
-                CALogs.i(tag, "Could not pull records for data out of database events. Waiting to send.", e)
+                CALogs.e(CAConfigs.LOG_SYSTEM, tag, "Could not pull records for data out of database events. Waiting to send.", e)
                 lastId = null
                 data = null
             } finally {

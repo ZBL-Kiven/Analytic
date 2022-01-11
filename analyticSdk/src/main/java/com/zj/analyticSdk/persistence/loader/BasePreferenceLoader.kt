@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
+import com.zj.analyticSdk.CAConfigs
 import com.zj.analyticSdk.CALogs.i
 import com.zj.analyticSdk.persistence.DbParams.DbUriMap
 import java.lang.IllegalStateException
@@ -55,9 +56,9 @@ abstract class BasePreferenceLoader internal constructor(context: Context, priva
                         data = sharedPreferences.getString(persistentKey, null)
                     }
                 } catch (e: ExecutionException) {
-                    i(TAG, "Cannot read distinct ids from sharedPreferences.", e)
+                    i(CAConfigs.LOG_SYSTEM, TAG, "Cannot read distinct ids from sharedPreferences.", e)
                 } catch (e: InterruptedException) {
-                    i(TAG, "Cannot read distinct ids from sharedPreferences.", e)
+                    i(CAConfigs.LOG_SYSTEM, TAG, "Cannot read distinct ids from sharedPreferences.", e)
                 }
                 if (data == null) {
                     item = serializer.create()
@@ -77,9 +78,9 @@ abstract class BasePreferenceLoader internal constructor(context: Context, priva
             try {
                 sharedPreferences = storedPreferences.get()
             } catch (e: ExecutionException) {
-                i(TAG, "Cannot read distinct ids from sharedPreferences.", e)
+                i(CAConfigs.LOG_SYSTEM, TAG, "Cannot read distinct ids from sharedPreferences.", e)
             } catch (e: InterruptedException) {
-                i(TAG, "Cannot read distinct ids from sharedPreferences.", e)
+                i(CAConfigs.LOG_SYSTEM, TAG, "Cannot read distinct ids from sharedPreferences.", e)
             }
             if (sharedPreferences == null) {
                 return
