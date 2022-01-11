@@ -46,8 +46,10 @@ internal object IntermittentTimerUtils {
      * */
     fun putOrUpdate(event: String, buildParams: JSONObject, intermittentType: IntermittentType) {
         val obj = event.poll()
+        CALogs.i("CCA.putOrUpdate.poll", "----- IntermittentType = ${intermittentType.name}  \nobj ===>  $obj \nparam ===> $buildParams", null)
         if (obj == null) {
             event saveObject buildParams
+            CALogs.i("CCA.putOrUpdate.poll ---- 11111", "$buildParams", null)
             return
         }
         val newKeys = buildParams.keys()
@@ -71,7 +73,7 @@ internal object IntermittentTimerUtils {
                 }
             }
         }
-        CALogs.i("CCA.putOrUpdate ,  IntermittentType = ${intermittentType.name}", obj.toString(), null)
+        CALogs.i("CCA.putOrUpdate", "IntermittentType = ${intermittentType.name}  $obj", null)
         event saveObject obj
     }
 }

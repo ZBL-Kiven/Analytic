@@ -1,5 +1,6 @@
 package com.zj.analyticTest
 
+import android.util.Log
 import com.zj.analyticSdk.CAConfigs
 import org.json.JSONObject
 
@@ -25,6 +26,7 @@ object CAConfig : CAConfigs {
 
     //当数据完成所有构建即将入库。
     override fun beforeEvent(eventName: String, properties: JSONObject): JSONObject? {
+        Log.e("on-cc analytic --- ", properties.toString())
         return super.beforeEvent(eventName, properties)
     }
 

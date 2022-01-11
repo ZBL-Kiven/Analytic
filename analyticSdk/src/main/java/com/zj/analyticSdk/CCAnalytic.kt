@@ -99,7 +99,8 @@ class CCAnalytic<T : CAConfigs>(private val config: T) {
     }
 
     /**
-     * 在需要统计一个页面周期前调用，随后的所有事件在 [PageTracker.onPageEnd] 前都会默认加入此页面的属性。
+     * Called before a page cycle needs to be counted,
+     * all subsequent events will be added to the properties of this page by default before [PageTracker.onPageEnd].
      * */
     fun trackPageStart(pageName: String, followedInfo: Any? = null, properties: JSONObject? = null) {
         PageTracker.onPageStart(pageName, followedInfo, properties)

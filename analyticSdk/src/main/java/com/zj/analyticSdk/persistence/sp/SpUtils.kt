@@ -10,7 +10,7 @@ internal object SpUtils {
 
     private val sp: SharedPreferences by lazy {
         val app = CCAnalytic.getApplication()
-        return@lazy app.getSharedPreferences(DbParams.DATABASE_NAME, Context.MODE_PRIVATE)
+        return@lazy app.getSharedPreferences("${DbParams.DATABASE_NAME}.sp", Context.MODE_PRIVATE)
     }
 
     infix fun String.saveObject(element: JSONObject) {
