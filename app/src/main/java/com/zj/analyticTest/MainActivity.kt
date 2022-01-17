@@ -66,4 +66,8 @@ class MainActivity : BaseResultAbleActivity() {
     fun exposeView(view: View) {
         startActivity(Intent(view.context, ThirdActivity::class.java))
     }
+
+    fun analyticOnce(view: View) {
+        CCAnalytic.get()?.trackEvent("track once")
+    }
 }

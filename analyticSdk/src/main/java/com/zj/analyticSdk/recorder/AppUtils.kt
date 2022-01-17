@@ -82,7 +82,7 @@ internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCall
             inBackgroundCurrent = true
             curAppState = "background"
             notifyStateStopped(true, curActiveInfo?.get()?.hashCode())
-            PageTracker.onPageEnd()
+            PageTracker.onPageEnd(null, true)
         }
     }
 

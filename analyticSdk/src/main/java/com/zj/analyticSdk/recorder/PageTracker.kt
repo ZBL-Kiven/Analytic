@@ -28,9 +28,11 @@ internal object PageTracker {
         }
     }
 
-    fun onPageEnd(properties: JSONObject? = null) {
+    fun onPageEnd(properties: JSONObject? = null, backgroundOnly: Boolean = false) {
         analyticPageLeave(properties = properties)
-        lastPageInfo = cachedPageInfo
+        if (!backgroundOnly && cachedPageInfo != null) {
+            lastPageInfo = cachedPageInfo?.copy()
+        }
         cachedPageInfo = null
     }
 
@@ -70,5 +72,9 @@ internal object PageTracker {
         return properties
     }
 
-    private data class PageInfo(val pageName: String, var followedInfo: WeakReference<Any?>? = null)
+    private data class PageInfo(val pageName: String, var followedInfo: WeakReference<Any?>? = null) {
+        fun copy(): PageInfo {
+            return PageInfo(pageName, followedInfo)
+        }
+    }
 }
