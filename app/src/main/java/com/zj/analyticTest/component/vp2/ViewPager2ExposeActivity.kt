@@ -26,7 +26,7 @@ class ViewPager2ExposeActivity : AppCompatActivity(), ViewPager2ExposeIn<Int>, B
     }
 
     private fun initView() {
-        ExposeUtils.withViewPager2(vp, this, this)
+        ExposeUtils.with(this).trackViewPager2(vp, this, this)
         val adapter = P2Adapter()
         vp.adapter = adapter
         v.setOnClickListener {

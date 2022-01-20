@@ -1,6 +1,7 @@
 package com.zj.analyticSdk.expose.i
 
 import android.database.DataSetObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.zj.analyticSdk.expose.p.BaseExpose
@@ -8,7 +9,7 @@ import com.zj.analyticSdk.expose.p.BaseExposeIn
 import com.zj.analyticSdk.expose.p.ViewPagerExposeIn
 import com.zj.analyticSdk.utils.PreviousAbleInt
 
-internal class ViewPagerExposer<T>(private val pager: ViewPager, private val exposeIn: ViewPagerExposeIn<T>, bex: BaseExposeIn<T>) : BaseExpose<T, ViewPager>(pager, bex), ViewPager.OnAdapterChangeListener, ViewPager.OnPageChangeListener {
+internal class ViewPagerExposer<T>(lifecycleOwner: LifecycleOwner, private val pager: ViewPager, private val exposeIn: ViewPagerExposeIn<T>, bex: BaseExposeIn<T>) : BaseExpose<T, ViewPager>(lifecycleOwner, pager, bex), ViewPager.OnAdapterChangeListener, ViewPager.OnPageChangeListener {
 
     private var currentItemPositionIsDetached = false
     private var mayNotifyCurrent = false

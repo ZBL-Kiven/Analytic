@@ -10,7 +10,6 @@ import android.content.Context
 import android.content.res.Configuration
 import java.lang.IllegalStateException
 import java.lang.ref.WeakReference
-import java.util.concurrent.atomic.AtomicBoolean
 
 internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCallbacks2 {
 
@@ -20,7 +19,6 @@ internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCall
     private var application: Application? = null
     private var isInitLifecycleCallback = false
     private var runningTasksNum: Int = 0
-    private var appStateListeners = mutableMapOf<String, StatusChangeListener>()
     private var inBackgroundCurrent = false
     private var curCode: Int = 0
 
@@ -53,16 +51,13 @@ internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCall
         if (curActiveInfo?.get() != activity) {
             curActiveInfo = WeakReference(activity)
         }
-        notifyStateStopped(false, activity.hashCode())
     }
 
     override fun onActivityPaused(activity: Activity) {
         runningTasksNum = runningTasksNum--.coerceAtLeast(0)
     }
 
-    override fun onActivityStopped(activity: Activity) {
-        notifyStateStopped(true, activity.hashCode())
-    }
+    override fun onActivityStopped(activity: Activity) {}
 
     override fun onActivityDestroyed(activity: Activity) {
         if (curActiveInfo?.get() == activity) {
@@ -81,7 +76,6 @@ internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCall
         if (!inBackgroundCurrent && level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
             inBackgroundCurrent = true
             curAppState = "background"
-            notifyStateStopped(true, curActiveInfo?.get()?.hashCode())
             PageTracker.onPageEnd(null, true)
         }
     }
@@ -90,32 +84,10 @@ internal object AppUtils : Application.ActivityLifecycleCallbacks, ComponentCall
         return curAppState == "background"
     }
 
-    fun addOnAppStateChangeListener(name: String, l: StatusChangeListener) {
-        this.appStateListeners[name] = l
-    }
-
-    fun removeAppStateChangeListener(name: String) {
-        this.appStateListeners.remove(name)
-    }
-
-    private fun notifyStateStopped(value: Boolean, code: Int? = null) {
-        appStateListeners.forEach {
-            val v = it.value
-            if (code == null || v.activityHashCode == code) {
-                if (v.lastState.get() != value) {
-                    v.lastState.set(value)
-                    v.l.invoke(value)
-                }
-            }
-        }
-    }
-
     fun destroy() {
         application?.unregisterActivityLifecycleCallbacks(this)
         application?.unregisterComponentCallbacks(this)
         isInitLifecycleCallback = false
         runningTasksNum = 0
     }
-
-    data class StatusChangeListener(val activityHashCode: Int, val l: (Boolean) -> Unit, var lastState: AtomicBoolean = AtomicBoolean(false))
 }

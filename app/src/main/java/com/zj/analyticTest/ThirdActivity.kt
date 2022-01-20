@@ -22,7 +22,7 @@ class ThirdActivity : AppCompatActivity(), BaseExposeIn<Int> {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_third)
         val v = findViewById<View>(R.id.third_tv)
-        ExposeUtils.with(v, 1002, this)
+        ExposeUtils.with(this).track(v, 1002, this)
         v.setOnClickListener {
             startActivity(Intent(it.context, ThirdActivity::class.java))
         }

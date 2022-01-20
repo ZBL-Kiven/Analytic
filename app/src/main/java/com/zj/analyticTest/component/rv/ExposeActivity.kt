@@ -22,7 +22,7 @@ class ExposeActivity : AppCompatActivity(), RecyclerExposeIn<Int>, BaseExposeIn<
         rv = findViewById(R.id.main_rv)
         rv.layoutManager = LinearLayoutManager(this)
         rv.adapter = VAdapter()
-        ExposeUtils.withRecyclerView(rv, this, this)
+        ExposeUtils.with(this).trackRecyclerView(rv, this, this)
     }
 
     override fun onStart() {

@@ -1,12 +1,13 @@
 package com.zj.analyticSdk.expose.i
 
+import androidx.lifecycle.LifecycleOwner
 import androidx.viewpager2.widget.ViewPager2
 import com.zj.analyticSdk.expose.p.BaseExpose
 import com.zj.analyticSdk.expose.p.BaseExposeIn
 import com.zj.analyticSdk.expose.p.ViewPager2ExposeIn
 import com.zj.analyticSdk.utils.PreviousAbleInt
 
-internal class ViewPager2Exposer<T>(private val pager: ViewPager2, private val exposeIn: ViewPager2ExposeIn<T>, bex: BaseExposeIn<T>) : BaseExpose<T, ViewPager2>(pager, bex) {
+internal class ViewPager2Exposer<T>(lifecycleOwner: LifecycleOwner, private val pager: ViewPager2, private val exposeIn: ViewPager2ExposeIn<T>, bex: BaseExposeIn<T>) : BaseExpose<T, ViewPager2>(lifecycleOwner, pager, bex) {
 
     private var currentItemPositionIsDetached = pager.adapter != null
     private var pai = PreviousAbleInt(pager.currentItem)

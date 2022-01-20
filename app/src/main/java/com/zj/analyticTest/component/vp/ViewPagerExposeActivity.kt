@@ -24,7 +24,7 @@ class ViewPagerExposeActivity : AppCompatActivity(), ViewPagerExposeIn<Int>, Bas
     }
 
     private fun initView() {
-        ExposeUtils.withViewPager(vp, this, this)
+        ExposeUtils.with(this).trackViewPager(vp, this, this)
         findViewById<View>(R.id.main_btn).setOnClickListener {
             val adapter = PAdapter()
             vp.adapter = adapter

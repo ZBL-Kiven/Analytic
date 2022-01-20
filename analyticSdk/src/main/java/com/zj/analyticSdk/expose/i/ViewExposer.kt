@@ -2,6 +2,7 @@ package com.zj.analyticSdk.expose.i
 
 
 import android.view.View
+import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.widget.ViewPager2
@@ -9,7 +10,7 @@ import com.zj.analyticSdk.expose.p.BaseExpose
 import com.zj.analyticSdk.expose.p.BaseExposeIn
 import java.lang.IllegalArgumentException
 
-internal class ViewExposer<T>(view: View, private val data: T?, bex: BaseExposeIn<T>) : BaseExpose<T, View>(view, bex) {
+internal class ViewExposer<T>(lifecycleOwner: LifecycleOwner, view: View, private val data: T?, bex: BaseExposeIn<T>) : BaseExpose<T, View>(lifecycleOwner, view, bex) {
 
     init {
         when (view) {

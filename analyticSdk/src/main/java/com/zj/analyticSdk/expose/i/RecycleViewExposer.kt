@@ -1,6 +1,7 @@
 package com.zj.analyticSdk.expose.i
 
 import android.view.View
+import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -9,7 +10,7 @@ import com.zj.analyticSdk.expose.p.BaseExpose
 import com.zj.analyticSdk.expose.p.BaseExposeIn
 import com.zj.analyticSdk.expose.p.RecyclerExposeIn
 
-internal class RecycleViewExposer<T>(private val recyclerView: RecyclerView, private val exposeIn: RecyclerExposeIn<T>, bex: BaseExposeIn<T>) : BaseExpose<T, RecyclerView>(recyclerView, bex), RecyclerView.OnChildAttachStateChangeListener {
+internal class RecycleViewExposer<T>(lifecycleOwner: LifecycleOwner, private val recyclerView: RecyclerView, private val exposeIn: RecyclerExposeIn<T>, bex: BaseExposeIn<T>) : BaseExpose<T, RecyclerView>(lifecycleOwner, recyclerView, bex), RecyclerView.OnChildAttachStateChangeListener {
 
     private var onNotifyChanging = false
     private var registeredAdapter = false
