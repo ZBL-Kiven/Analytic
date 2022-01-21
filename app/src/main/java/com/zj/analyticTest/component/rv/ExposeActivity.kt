@@ -60,7 +60,7 @@ class ExposeActivity : AppCompatActivity(), RecyclerExposeIn<Int>, BaseExposeIn<
 
     fun addAll(view: View) {
         val adapter = rv.adapter as? VAdapter
-        adapter?.data?.addAll(0..1000)
-        adapter?.notifyItemRangeInserted(adapter.itemCount, adapter.itemCount + 1000)
+        adapter?.data?.addAll(0..20)
+        adapter?.notifyItemRangeInserted(adapter.itemCount, adapter.itemCount + 20)
     }
 }

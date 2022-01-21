@@ -9,7 +9,7 @@ import com.zj.analyticTest.R
 
 class VAdapter : RecyclerView.Adapter<VAdapter.Holder>() {
 
-    var data = (1..1000).toMutableList()
+    var data = (1..20).toMutableList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         val v = LayoutInflater.from(parent.context).inflate(R.layout.item, parent, false)

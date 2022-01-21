@@ -65,14 +65,12 @@ internal abstract class BaseExpose<T, V : View>(private val lifecycleOwner: Life
         postOrUse {
             bex.onAttached(data)
         }
-        l.setLastState(false)
     }
 
     protected fun detach(data: T?) {
         postOrUse {
             bex.onDetached(data)
         }
-        l.setLastState(true)
     }
 
     private fun postOrUse(use: () -> Unit) {
