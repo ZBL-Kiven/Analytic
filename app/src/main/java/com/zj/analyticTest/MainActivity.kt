@@ -68,6 +68,9 @@ class MainActivity : BaseResultAbleActivity() {
     }
 
     fun analyticOnce(view: View) {
-        CCAnalytic.get()?.trackEvent("track once")
+        CCAnalytic.get()?.trackPageStart("test_once")
+        CCAnalytic.get()?.trackEvent("track 00000000")
+        CCAnalytic.get()?.restoreToLastPage()
+        CCAnalytic.get()?.trackEvent("track 11111111")
     }
 }

@@ -10,6 +10,7 @@ internal object PageTracker {
 
     private var cachedPageInfo: PageInfo? = null
     private var lastPageInfo: PageInfo? = null
+    private var restorePageInfo: Pair<PageInfo?, PageInfo?>? = null
 
     fun onPageStart(pageName: String, followedInfo: Any? = null, properties: JSONObject? = null) {
         when (pageName) {
@@ -31,9 +32,18 @@ internal object PageTracker {
     fun onPageEnd(properties: JSONObject? = null, backgroundOnly: Boolean = false) {
         analyticPageLeave(properties = properties)
         if (!backgroundOnly && cachedPageInfo != null) {
+            restorePageInfo = Pair(cachedPageInfo, lastPageInfo)
             lastPageInfo = cachedPageInfo?.copy()
         }
         cachedPageInfo = null
+    }
+
+    fun endAndRestorePage(withOldRefer: Boolean = false, properties: JSONObject? = null) {
+        val cur = restorePageInfo?.first
+        if (withOldRefer) {
+            lastPageInfo = restorePageInfo?.second
+        }
+        onPageStart(cur?.pageName ?: "restore_page_not_found", cur?.followedInfo, properties)
     }
 
     fun analyticPageLeave(resetTimer: Boolean = false, properties: JSONObject? = null) {

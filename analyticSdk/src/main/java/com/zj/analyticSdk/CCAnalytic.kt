@@ -105,8 +105,21 @@ class CCAnalytic<T : CAConfigs>(private val config: T) {
         PageTracker.onPageStart(pageName, followedInfo, properties)
     }
 
+    /**
+     * End the statistics of the current page,
+     * usually it is automatically used by the next trackPageStart,
+     * so, you needn't to call this separately in normal use.
+     * */
     fun trackPageEnd(properties: JSONObject? = null) {
         PageTracker.onPageEnd(properties)
+    }
+
+    /**
+     * Go back and restart to the previous page
+     * @param withOldRefer Whether to reset the reference of the previous page
+     * */
+    fun restoreToLastPage(withOldRefer: Boolean = false, properties: JSONObject? = null) {
+        PageTracker.endAndRestorePage(withOldRefer, properties)
     }
 
     /**
@@ -132,6 +145,9 @@ class CCAnalytic<T : CAConfigs>(private val config: T) {
     fun trackEvent(eventName: String, jsonObject: JSONObject, withData: Any? = null, intermittentType: Boolean = false) {
         if (eventName.isNotEmpty() || jsonObject.length() > 0) {
             val info = EventInfo.record(eventName, jsonObject, intermittentType, withData)
+            if (eventName != getConfig().getEventNameBuilder().onPageFinished()) {
+                PageTracker.trackPageInfo(jsonObject)
+            }
             WorkManagerQueue.push(info)
         }
     }

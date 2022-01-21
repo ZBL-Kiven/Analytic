@@ -24,9 +24,6 @@ internal class RecordTask(private val info: EventInfo, private val handleIn: Msg
             }
             val defaultParams = BasePropertyCollector.getBaseProperties(recordInfo.eventName)
             val params = CCAnalytic.getConfig().addDefaultParam(recordInfo.eventName, recordInfo.withData, defaultParams)
-            if (recordInfo.eventName != CCAnalytic.getConfig().getEventNameBuilder().onPageFinished()) {
-                PageTracker.trackPageInfo(obj)
-            }
             val merged = CCAnalytic.getConfig().onMergeProperties(recordInfo.eventName, obj, params) ?: throw NullPointerException("recording params must not be null ,transfer by CAConfig.onMergeProperties")
             if (recordInfo.intermittentType) {
                 IntermittentTimerUtils.save(recordInfo.eventName, merged)

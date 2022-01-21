@@ -14,7 +14,7 @@ object CAConfig : CAConfigs {
     override fun autoUploadAble(): Boolean = true
 
     override fun logFrequency(): Int {
-        return CAConfigs.LOG_INTERMITTENT_RECORD.or(CAConfigs.LOG_UPLOAD)
+        return CAConfigs.LOG_ALL
     }
 
     //服务器地址
