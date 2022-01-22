@@ -144,10 +144,10 @@ class CCAnalytic<T : CAConfigs>(private val config: T) {
      * */
     fun trackEvent(eventName: String, jsonObject: JSONObject, withData: Any? = null, intermittentType: Boolean = false) {
         if (eventName.isNotEmpty() || jsonObject.length() > 0) {
-            val info = EventInfo.record(eventName, jsonObject, intermittentType, withData)
             if (eventName != getConfig().getEventNameBuilder().onPageFinished()) {
                 PageTracker.trackPageInfo(jsonObject)
             }
+            val info = EventInfo.record(eventName, jsonObject, intermittentType, withData)
             WorkManagerQueue.push(info)
         }
     }

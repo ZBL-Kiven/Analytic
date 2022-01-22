@@ -12,7 +12,7 @@ internal object PageTracker {
     private var lastPageInfo: PageInfo? = null
     private var restorePageInfo: Pair<PageInfo?, PageInfo?>? = null
 
-    fun onPageStart(pageName: String, followedInfo: Any? = null, properties: JSONObject? = null) {
+    fun onPageStart(pageName: String, followedInfo: Any? = null, properties: JSONObject? = null,) {
         when (pageName) {
             cachedPageInfo?.pageName -> {
                 if (cachedPageInfo?.followedInfo?.get() != followedInfo) {

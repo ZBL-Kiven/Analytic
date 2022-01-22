@@ -46,7 +46,7 @@ internal object WorkManagerQueue : MsgDealIn {
                         cursor leastDownTo 0
                         inHandle.set(false)
                     } else {
-                        queue.push(poll)
+                        queue.offerFirst(poll)
                     }
                 } ?: cursor leastDownTo 0
             } catch (e: Exception) {
